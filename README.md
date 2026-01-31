@@ -3,9 +3,9 @@ Team Name: Taskforce 141
 
 Team Members: 
   1. Tanish Jain
-  2. Harjas Singh Dhami
-  3. Utkarsh Walia
-  4. Siya Sharma
+  2. Siya Sharma
+  3. Harjas Singh Dhami
+  4. Utkarsh Walia
 
 
 # Problem Statement
