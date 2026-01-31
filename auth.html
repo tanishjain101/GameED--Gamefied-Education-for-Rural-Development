@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join GameEd Rural - Gamified Education for Rural Development</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #064e3b 100%);
+            min-height: 100vh;
+        }
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+        }
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 4px;
+            transition: all 0.3s ease;
+        }
+        .strength-weak { background: #ef4444; width: 25%; }
+        .strength-fair { background: #f59e0b; width: 50%; }
+        .strength-good { background: #10b981; width: 75%; }
+        .strength-strong { background: #22c55e; width: 100%; }
+    </style>
+
+    <style>
+    /* Add padding to body to prevent content from hiding behind fixed navbar */
+    body {
+        padding-top: 70px !important;
+    }
+    
+    /* Ensure smooth scrolling for anchor links */
+    html {
+        scroll-padding-top: 70px;
+        scroll-behavior: smooth;
+    }
+</style>
+
+
+</head>
+<body class="auth-gradient text-white">
+    <custom-header></custom-header>
+    
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-8">
+                <a href="index.html" class="inline-flex items-center text-emerald-400 hover:text-emerald-300 mb-6">
+                    <i data-feather="arrow-left" class="w-5 h-5 mr-2"></i>
+                    Back to Home
+                </a>
+                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                    <i data-feather="user-plus" class="w-10 h-10 text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Join the Learning Revolution</h1>
+                <p class="text-slate-300">Start your gamified education journey today</p>
+            </div>
+            
+            <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-emerald-800/30 p-6 md:p-8">
+                <!-- Tabs -->
+                <div class="flex mb-8 bg-slate-900/50 rounded-lg p-1">
+                    <button id="loginTab" class="flex-1 py-3 rounded-lg font-medium transition-all tab-active">
+                        Login
+                    </button>
+                    <button id="signupTab" class="flex-1 py-3 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+                        Sign Up
+                    </button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-slate-300 mb-2">Email or Username</label>
+                        <input type="text" required 
+                               class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none"
+                               placeholder="Enter your email or username"
+                               id="loginEmail">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-slate-300">Password</label>
+                            <a href="#" class="text-sm text-emerald-400 hover:text-emerald-300">Forgot password?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" required 
+                                   class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none pr-10"
+                                   placeholder="Enter your password"
+                                   id="loginPassword">
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white" id="toggleLoginPassword">
+                                <i data-feather="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="w-4 h-4 text-emerald-500 bg-slate-700 border-slate-600 rounded focus:ring-emerald-500">
+                        <label for="remember" class="ml-2 text-slate-300">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg font-bold text-lg hover:scale-[1.02] transition-transform"
+                            id="loginSubmit">
+                        Continue Learning Journey
+                    </button>
+                    
+                    <div class="text-center text-slate-400">
+                        Don't have an account? 
+                        <button type="button" id="switchToSignup" class="text-emerald-400 hover:text-emerald-300 font-medium">
+                            Sign up here
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Signup Form -->
+                <form id="signupForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-slate-300 mb-2">Full Name</label>
+                        <input type="text" required 
+                               class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none"
+                               placeholder="Enter your full name"
+                               id="signupName">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Email Address</label>
+                        <input type="email" required 
+                               class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none"
+                               placeholder="Enter your email"
+                               id="signupEmail">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Username</label>
+                        <input type="text" required 
+                               class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none"
+                               placeholder="Choose a username"
+                               id="signupUsername">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" required 
+                                   class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none pr-10"
+                                   placeholder="Create a strong password"
+                                   id="signupPassword">
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white" id="toggleSignupPassword">
+                                <i data-feather="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div id="passwordStrength" class="password-strength strength-weak"></div>
+                        <p class="text-sm text-slate-400 mt-1">Minimum 8 characters with letters and numbers</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Confirm Password</label>
+                        <div class="relative">
+                            <input type="password" required 
+                                   class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none pr-10"
+                                   placeholder="Re-enter your password"
+                                   id="signupConfirmPassword">
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white" id="toggleConfirmPassword">
+                                <i data-feather="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div id="passwordMatch" class="text-sm mt-1 hidden"></div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Region</label>
+                        <select required 
+                                class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none text-white"
+                                id="signupRegion">
+                            <option value="" disabled selected>Select your region</option>
+                            <option value="rural">Rural Area</option>
+                            <option value="semi-rural">Semi-Rural Area</option>
+                            <option value="urban">Urban Area</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 mb-2">Age Group</label>
+                        <select required 
+                                class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg input-field focus:border-emerald-500 focus:outline-none text-white"
+                                id="signupAge">
+                            <option value="" disabled selected>Select your age group</option>
+                            <option value="8-12">8-12 years</option>
+                            <option value="13-16">13-16 years</option>
+                            <option value="17-20">17-20 years</option>
+                            <option value="21+">21+ years</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <input type="checkbox" id="terms" required 
+                               class="w-4 h-4 text-emerald-500 bg-slate-700 border-slate-600 rounded focus:ring-emerald-500 mt-1">
+                        <label for="terms" class="ml-2 text-slate-300">
+                            I agree to the 
+                            <a href="#" class="text-emerald-400 hover:text-emerald-300">Terms of Service</a>
+                            and 
+                            <a href="#" class="text-emerald-400 hover:text-emerald-300">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <input type="checkbox" id="newsletter" 
+                               class="w-4 h-4 text-emerald-500 bg-slate-700 border-slate-600 rounded focus:ring-emerald-500 mt-1">
+                        <label for="newsletter" class="ml-2 text-slate-300">
+                            Send me updates about new games and features
+                        </label>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg font-bold text-lg hover:scale-[1.02] transition-transform"
+                            id="signupSubmit">
+                        Create Free Account & Start Learning
+                    </button>
+                    
+                    <div class="text-center text-slate-400">
+                        Already have an account? 
+                        <button type="button" id="switchToLogin" class="text-emerald-400 hover:text-emerald-300 font-medium">
+                            Login here
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-8 pt-8 border-t border-slate-700">
+                    <p class="text-center text-slate-400 mb-4">Or continue with</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="py-3 bg-slate-900/50 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center social-login">
+                            <i data-feather="smartphone" class="w-5 h-5 mr-2"></i>
+                            Phone
+                        </button>
+                        <button class="py-3 bg-slate-900/50 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center social-login">
+                            <i data-feather="mail" class="w-5 h-5 mr-2"></i>
+                            Gmail
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-slate-400 text-sm">
+                <p>By joining, you agree to our commitment to rural education development</p>
+                <p class="mt-2">Need help? <a href="#" class="text-emerald-400 hover:text-emerald-300">Contact Support</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900/80 border-t border-slate-800 mt-20">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center text-slate-500 text-sm">
+                <p>GameEd Rural. Empowering rural youth through gamified education.</p>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Terms</a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="components/header.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize feather icons
+            if (window.feather) {
+                feather.replace();
+            }
+            
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const redirect = urlParams.get('redirect');
+            
+            // Check if user is already logged in
+            const userData = localStorage.getItem('gameEdUser');
+            if (userData) {
+                // Redirect to dashboard if already logged in
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            // Elements
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const switchToSignup = document.getElementById('switchToSignup');
+            const switchToLogin = document.getElementById('switchToLogin');
+            
+            // Set initial mode
+            if (mode === 'signup') {
+                showSignup();
+            } else {
+                showLogin();
+            }
+            
+            // Tab handlers
+            loginTab.addEventListener('click', showLogin);
+            signupTab.addEventListener('click', showSignup);
+            switchToSignup.addEventListener('click', showSignup);
+            switchToLogin.addEventListener('click', showLogin);
+            
+            function showLogin() {
+                loginTab.classList.add('tab-active');
+                loginTab.classList.remove('text-slate-400');
+                loginTab.classList.add('text-white');
+                signupTab.classList.remove('tab-active');
+                signupTab.classList.add('text-slate-400');
+                signupTab.classList.remove('text-white');
+                
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                
+                history.replaceState(null, '', '?mode=login');
+            }
+            
+            function showSignup() {
+                signupTab.classList.add('tab-active');
+                signupTab.classList.remove('text-slate-400');
+                signupTab.classList.add('text-white');
+                loginTab.classList.remove('tab-active');
+                loginTab.classList.add('text-slate-400');
+                loginTab.classList.remove('text-white');
+                
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                
+                history.replaceState(null, '', '?mode=signup');
+            }
+            
+            // Password visibility toggle
+            document.getElementById('toggleLoginPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('loginPassword');
+                togglePasswordVisibility(passwordInput, this);
+            });
+            
+            document.getElementById('toggleSignupPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('signupPassword');
+                togglePasswordVisibility(passwordInput, this);
+            });
+            
+            document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('signupConfirmPassword');
+                togglePasswordVisibility(passwordInput, this);
+            });
+            
+            function togglePasswordVisibility(input, button) {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                const icon = button.querySelector('i');
+                if (type === 'text') {
+                    icon.setAttribute('data-feather', 'eye-off');
+                } else {
+                    icon.setAttribute('data-feather', 'eye');
+                }
+                feather.replace(icon);
+            }
+            
+            // Password strength checker
+            const signupPassword = document.getElementById('signupPassword');
+            const passwordStrength = document.getElementById('passwordStrength');
+            
+            signupPassword.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+            
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                
+                if (password.length >= 8) strength += 1;
+                if (password.length >= 12) strength += 1;
+                if (/[a-z]/.test(password)) strength += 1;
+                if (/[A-Z]/.test(password)) strength += 1;
+                if (/[0-9]/.test(password)) strength += 1;
+                if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+                
+                passwordStrength.className = 'password-strength';
+                
+                if (password.length === 0) {
+                    passwordStrength.classList.add('strength-weak');
+                } else if (strength <= 2) {
+                    passwordStrength.classList.add('strength-weak');
+                } else if (strength <= 3) {
+                    passwordStrength.classList.add('strength-fair');
+                } else if (strength <= 5) {
+                    passwordStrength.classList.add('strength-good');
+                } else {
+                    passwordStrength.classList.add('strength-strong');
+                }
+            }
+            
+            // Form submissions
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const rememberMe = document.getElementById('remember').checked;
+                
+                if (!email || !password) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                // Check if user exists in localStorage
+                const existingUsers = JSON.parse(localStorage.getItem('gameEdUsers') || '[]');
+                const user = existingUsers.find(u => u.email === email || u.username === email);
+                
+                if (!user) {
+                    showNotification('Account not found. Please sign up first.', 'error');
+                    return;
+                }
+                
+                // In a real app, you would verify password here
+                // For demo, we'll just log them in
+                const userData = {
+                    id: user.id || Date.now(),
+                    name: user.name,
+                    email: user.email,
+                    username: user.username,
+                    region: user.region,
+                    age: user.age,
+                    xp: user.xp || 100,
+                    level: user.level || 1,
+                    badges: user.badges || ['new-learner'],
+                    achievements: user.achievements || [],
+                    progress: user.progress || {
+                        math: 0,
+                        science: 0,
+                        agriculture: 0,
+                        language: 0
+                    },
+                    lastLogin: new Date().toISOString(),
+                    rememberMe: rememberMe
+                };
+                
+                // Save user data
+                if (rememberMe) {
+                    localStorage.setItem('gameEdUser', JSON.stringify(userData));
+                } else {
+                    sessionStorage.setItem('gameEdUser', JSON.stringify(userData));
+                }
+                
+                showNotification('Login successful! Redirecting to dashboard...', 'success');
+                
+                // Update header
+                document.dispatchEvent(new CustomEvent('authChange', { 
+                    detail: { isLoggedIn: true, username: userData.username }
+                }));
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            });
+            
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const username = document.getElementById('signupUsername').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                const region = document.getElementById('signupRegion').value;
+                const age = document.getElementById('signupAge').value;
+                const terms = document.getElementById('terms').checked;
+                
+                // Validation
+                if (!name || !email || !username || !password || !confirmPassword || !region || !age) {
+                    showNotification('Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                if (!terms) {
+                    showNotification('You must agree to the Terms of Service', 'error');
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    showNotification('Password must be at least 8 characters long', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showNotification('Passwords do not match', 'error');
+                    return;
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showNotification('Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                // Check if user already exists
+                const existingUsers = JSON.parse(localStorage.getItem('gameEdUsers') || '[]');
+                if (existingUsers.some(user => user.username === username)) {
+                    showNotification('Username already taken. Please choose another.', 'error');
+                    return;
+                }
+                
+                if (existingUsers.some(user => user.email === email)) {
+                    showNotification('Email already registered. Try logging in instead.', 'error');
+                    return;
+                }
+                
+                // Create user
+                const userData = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    username: username,
+                    region: region,
+                    age: age,
+                    xp: 100,
+                    level: 1,
+                    badges: ['new-learner'],
+                    achievements: [],
+                    progress: {
+                        math: 0,
+                        science: 0,
+                        agriculture: 0,
+                        language: 0
+                    },
+                    newsletter: document.getElementById('newsletter').checked,
+                    joined: new Date().toISOString()
+                };
+                
+                // Save user data
+                localStorage.setItem('gameEdUser', JSON.stringify(userData));
+                
+                // Add to users list
+                existingUsers.push({
+                    id: userData.id,
+                    username: username,
+                    email: email,
+                    name: name,
+                    joined: userData.joined
+                });
+                localStorage.setItem('gameEdUsers', JSON.stringify(existingUsers));
+                
+                showNotification('Account created successfully! Welcome to GameEd Rural!', 'success');
+                
+                // Update header
+                document.dispatchEvent(new CustomEvent('authChange', { 
+                    detail: { isLoggedIn: true, username: username }
+                }));
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            });
+            
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `notification fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 transform transition-transform duration-300 ${
+                    type === 'success' ? 'bg-emerald-600' : 
+                    type === 'error' ? 'bg-red-600' : 
+                    'bg-blue-600'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i data-feather="${
+                            type === 'success' ? 'check-circle' : 
+                            type === 'error' ? 'alert-circle' : 
+                            'info'
+                        }" class="w-5 h-5 mr-3"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                if (window.feather) {
+                    feather.replace();
+                }
+                
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Auto-focus
+            if (mode === 'signup') {
+                document.getElementById('signupName')?.focus();
+            } else {
+                document.getElementById('loginEmail')?.focus();
+            }
+        });
+    </script>
+</body>
+</html>

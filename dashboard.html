@@ -1,0 +1,3123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameEd Rural</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #064e3b 100%);
+            min-height: 100vh;
+        }
+        .sidebar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        .game-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: #10b981;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+        .achievement-badge {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #10b981;
+        }
+        .sidebar-link.active {
+            background: rgba(34, 197, 94, 0.15);
+            border-left: 3px solid #10b981;
+            color: #10b981;
+        }
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        /* Achievements Styles */
+        .achievements-container {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .badge-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .badge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 0.75rem;
+        }
+        
+        .badge-card:hover::before {
+            opacity: 1;
+        }
+        
+        .badge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .badge-card.earned {
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .badge-card.earned:hover {
+            animation: none;
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+        
+        .badge-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 0.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--badge-color-1), var(--badge-color-2));
+            color: white;
+            position: relative;
+        }
+        
+        .badge-card.earned .badge-icon::after {
+            content: '✨';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.8rem;
+            animation: sparkle 2s infinite;
+        }
+        
+        .badge-card.earned .badge-icon {
+            animation: pulse 2s infinite;
+        }
+        
+        .badge-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: white;
+        }
+        
+        .badge-desc {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge-xp {
+            font-size: 0.7rem;
+            color: #fbbf24;
+            font-weight: 600;
+            background: rgba(251, 191, 36, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
+        
+        .badge-locked {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+        
+        .badge-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .badge-details-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        
+        .achievement-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 0.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+        
+        .tab-btn.active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #10b981;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Game-specific badges */
+        .badge-card.has-game {
+            border-left: 4px solid var(--badge-color-1);
+        }
+        
+        .badge-card.has-game:hover {
+            border-left-color: var(--badge-color-2);
+        }
+        
+        /* Category indicators */
+        .badge-card[data-game="math-quest"]::before {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%,
+                rgba(59, 130, 246, 0) 100%);
+        }
+        
+        .badge-card[data-game="agri-sim"]::before {
+            background: linear-gradient(135deg, 
+                rgba(16, 185, 129, 0.1) 0%,
+                rgba(16, 185, 129, 0) 100%);
+        }
+        
+        .badge-card[data-game="science-lab"]::before {
+            background: linear-gradient(135deg, 
+                rgba(139, 92, 246, 0.1) 0%,
+                rgba(139, 92, 246, 0) 100%);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes unlock {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .unlock-animation {
+            animation: unlock 0.5s ease-out;
+        }
+        
+        .achievements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .achievement-count {
+            background: rgba(34, 197, 94, 0.2);
+            color: #10b981;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        /* Popular Games Section */
+        .popular-game-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .popular-game-card:hover {
+            transform: translateY(-3px);
+            border-color: #10b981;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        
+        /* NEW STYLES FOR QUIZES AND CURRICULUM */
+        
+        /* Quiz Styles */
+        .quiz-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(34, 197, 94, 0.3);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .quiz-card.completed {
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .quiz-info h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-meta {
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .quiz-desc {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quiz-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .quiz-stats i {
+            width: 14px;
+            height: 14px;
+            margin-right: 4px;
+        }
+
+        .start-quiz-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .quiz-result {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .score-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: conic-gradient(#10b981 calc(var(--score) * 1%), #1e293b 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1e293b;
+        }
+
+        .score-circle span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .xp-earned {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Curriculum Styles */
+        .curriculum-section {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .curriculum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .board-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .board-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .board-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .class-info {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .edit-curriculum-btn {
+            background: rgba(34, 197, 94, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-curriculum-btn:hover {
+            background: rgba(34, 197, 94, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .subject-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .subject-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .subject-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .subject-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.125rem;
+        }
+
+        .subject-info p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            min-width: 40px;
+        }
+
+        .view-lessons-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-lessons-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Quiz Modal */
+        .quiz-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .quiz-modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .quiz-question {
+            padding: 2rem;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .question-timer {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-btn.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .option-btn.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .option-btn.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-progress {
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .quiz-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            transition: width 0.3s ease;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .nav-btn.next {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .nav-btn.next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-btn.submit {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .nav-btn.submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Quiz Results */
+        .quiz-results {
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .results-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 2rem;
+        }
+
+        .results-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-text-fill-color: transparent;
+        }
+
+        .results-score {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .results-total {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100vh;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .badge-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 0.75rem;
+            }
+            .achievement-tabs {
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Adjust for header */
+        body {
+            padding-top: 0;
+        }
+        custom-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="dashboard-gradient text-white">
+    <!-- Header/Navbar -->
+    <custom-header></custom-header>
+    
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn fixed top-20 left-4 z-40 p-2 bg-emerald-600 rounded-lg md:hidden" id="mobileMenuBtn">
+        <i data-feather="menu" class="w-6 h-6"></i>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <div class="flex min-h-screen pt-0">
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 p-6 border-r border-slate-800 md:block hidden" id="sidebar">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                    <i data-feather="book" class="w-5 h-5 text-white"></i>
+                </div>
+                <h2 class="text-xl font-bold">GameEd Dashboard</h2>
+            </div>
+            
+            <!-- User Profile -->
+            <div class="mb-8 p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white font-bold text-lg" id="userAvatar">
+                        U
+                    </div>
+                    <div>
+                        <h3 class="font-bold" id="userName">Loading...</h3>
+                        <p class="text-sm text-slate-400" id="userLevel">Level 1</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>XP Progress</span>
+                        <span id="xpProgress">0/1000</span>
+                    </div>
+                    <div class="progress-bar bg-slate-800">
+                        <div class="progress-fill" id="xpBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="space-y-2">
+                <a href="#" class="sidebar-link active flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="home" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="play" class="w-5 h-5"></i>
+                    <span>Games</span>
+                </a>
+                <a href="#achievements-section" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="award" class="w-5 h-5"></i>
+                    <span>Trophies</span>
+                </a>
+                <a href="#quiz-section" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="help-circle" class="w-5 h-5"></i>
+                    <span>Quizzes</span>
+                </a>
+                <a href="#curriculum-section" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="book-open" class="w-5 h-5"></i>
+                    <span>Curriculum</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="trending-up" class="w-5 h-5"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="users" class="w-5 h-5"></i>
+                    <span>Community</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="settings" class="w-5 h-5"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="index.html" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i data-feather="globe" class="w-5 h-5"></i>
+                    <span>Home</span>
+                </a>
+                <button id="logoutBtn" class="sidebar-link w-full text-left flex items-center space-x-3 p-3 rounded-lg text-red-400 hover:text-red-300">
+                    <i data-feather="log-out" class="w-5 h-5"></i>
+                    <span>Logout</span>
+                </button>
+            </nav>
+            
+            <!-- Quick Stats -->
+            <div class="mt-8 p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+                <h4 class="font-bold mb-3">Quick Stats</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Total XP</span>
+                        <span class="font-bold" id="totalXP">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Games Played</span>
+                        <span class="font-bold" id="gamesPlayed">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Quizzes Done</span>
+                        <span class="font-bold" id="quizzesDone">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Trophies</span>
+                        <span class="font-bold" id="badgesCount">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Streak</span>
+                        <span class="font-bold" id="streak">0 days</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 mt-0">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold">Welcome Back, <span id="greetingName">Student</span>!</h1>
+                    <p class="text-slate-400">Continue your learning journey</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg">
+                        <i data-feather="star" class="w-5 h-5 text-yellow-400"></i>
+                        <span class="font-bold" id="headerXP">0</span>
+                        <span class="text-slate-400">XP</span>
+                    </div>
+                    <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors" id="playRandomGame">
+                        <i data-feather="play" class="w-5 h-5 inline-block mr-2"></i>
+                        Play Random Game
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card p-6 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm">Total XP</p>
+                            <h3 class="text-2xl font-bold" id="statXP">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <i data-feather="star" class="w-6 h-6 text-emerald-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400">Earned from games and trophies</p>
+                </div>
+                
+                <div class="stat-card p-6 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm">Level</p>
+                            <h3 class="text-2xl font-bold" id="statLevel">1</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <i data-feather="trending-up" class="w-6 h-6 text-blue-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Next Level:</span>
+                        <span id="nextLevelXP">1000 XP</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card p-6 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm">Games Played</p>
+                            <h3 class="text-2xl font-bold" id="statGames">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                            <i data-feather="play" class="w-6 h-6 text-purple-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400">Keep playing to earn more trophies</p>
+                </div>
+                
+                <div class="stat-card p-6 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-slate-400 text-sm">Learning Streak</p>
+                            <h3 class="text-2xl font-bold" id="statStreak">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <i data-feather="zap" class="w-6 h-6 text-yellow-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400">Days of continuous learning</p>
+                </div>
+            </div>
+            
+            <!-- XP Counter and Level Progress -->
+            <div class="mb-8 p-6 bg-gradient-to-r from-emerald-900/30 to-blue-900/30 rounded-xl border border-emerald-800/30">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-center md:text-left">
+                        <h3 class="text-2xl font-bold mb-2">🏆 XP & Level Progress</h3>
+                        <p class="text-slate-300">Earn XP to level up and unlock special badges!</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-6">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-yellow-400" id="currentXP">0</div>
+                            <div class="text-sm text-slate-400">Total XP</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-emerald-400" id="currentLevel">1</div>
+                            <div class="text-sm text-slate-400">Level</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-blue-400" id="nextLevelXPNeeded">0</div>
+                            <div class="text-sm text-slate-400">XP to Next Level</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span>Level Progress</span>
+                        <span id="levelProgress">0%</span>
+                    </div>
+                    <div class="progress-bar bg-slate-800">
+                        <div class="progress-fill bg-gradient-to-r from-yellow-500 via-emerald-500 to-blue-500" 
+                             id="levelProgressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-3 bg-slate-900/50 rounded-lg">
+                        <div class="text-lg font-bold text-emerald-400">+50 XP</div>
+                        <div class="text-xs text-slate-400">Complete a Lesson</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-900/50 rounded-lg">
+                        <div class="text-lg font-bold text-yellow-400">+100 XP</div>
+                        <div class="text-xs text-slate-400">Finish a Quiz</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-900/50 rounded-lg">
+                        <div class="text-lg font-bold text-blue-400">+150 XP</div>
+                        <div class="text-xs text-slate-400">Win a Game</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-900/50 rounded-lg">
+                        <div class="text-lg font-bold text-purple-400">+200 XP</div>
+                        <div class="text-xs text-slate-400">Daily Streak Bonus</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Curriculum Section -->
+            <div class="curriculum-section mb-8" id="curriculum-section">
+                <!-- Curriculum content will be loaded here -->
+            </div>
+            
+            <!-- Quizzes Section -->
+            <div class="mb-8" id="quiz-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">🎯 Weekly Quizzes</h2>
+                    <div class="text-sm text-slate-400">
+                        <span id="quizStats">0 quizzes completed</span>
+                        <span class="mx-2">•</span>
+                        <span id="quizXP">0 XP earned</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="quizzesGrid">
+                    <!-- Quizzes will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Popular Games Section -->
+            <div class="mb-8 p-6 bg-gradient-to-r from-slate-800/50 to-emerald-900/30 rounded-xl border border-emerald-800/30">
+                <h3 class="text-xl font-bold mb-4">🎮 Play Popular Games to Earn Trophies</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="popular-game-card text-center p-4" onclick="launchGame('math-quest')">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <span class="text-2xl">🧮</span>
+                        </div>
+                        <div class="font-semibold">Math Quest</div>
+                        <div class="text-xs text-slate-400 mt-1">5,000+ players</div>
+                        <div class="text-xs text-yellow-400 mt-2">3 Trophies available</div>
+                    </div>
+                    
+                    <div class="popular-game-card text-center p-4" onclick="launchGame('agri-sim')">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <span class="text-2xl">🚜</span>
+                        </div>
+                        <div class="font-semibold">Agri-Sim</div>
+                        <div class="text-xs text-slate-400 mt-1">3,200+ players</div>
+                        <div class="text-xs text-yellow-400 mt-2">2 Trophies available</div>
+                    </div>
+                    
+                    <div class="popular-game-card text-center p-4" onclick="launchGame('science-lab')">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-500/20 flex items-center justify-center">
+                            <span class="text-2xl">🔬</span>
+                        </div>
+                        <div class="font-semibold">Science Lab</div>
+                        <div class="text-xs text-slate-400 mt-1">4,100+ players</div>
+                        <div class="text-xs text-yellow-400 mt-2">3 Trophies available</div>
+                    </div>
+                    
+                    <div class="popular-game-card text-center p-4" onclick="launchGame('word-master')">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <span class="text-2xl">📚</span>
+                        </div>
+                        <div class="font-semibold">Word Master</div>
+                        <div class="text-xs text-slate-400 mt-1">2,800+ players</div>
+                        <div class="text-xs text-yellow-400 mt-2">2 Trophies available</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Game Badges Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">🎮 Game Badges - Play to Earn!</h2>
+                    <div class="text-sm text-emerald-400">
+                        <i data-feather="award" class="w-4 h-4 inline-block mr-1"></i>
+                        Unlock badges by playing games
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="gameBadgesGrid">
+                    <!-- Game badges will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Achievements Section -->
+            <div class="achievements-container mb-8" id="achievements-section">
+                <div class="achievements-header">
+                    <h2 class="text-2xl font-bold">🏆 Game Trophies & Badges</h2>
+                    <div class="achievement-count">
+                        <span id="earnedCount">0</span>/<span id="totalCount">0</span> Earned
+                    </div>
+                </div>
+                
+                <!-- Achievement Tabs -->
+                <div class="achievement-tabs">
+                    <button class="tab-btn active" data-tab="all">All Trophies</button>
+                    <button class="tab-btn" data-tab="game">Game Mastery</button>
+                    <button class="tab-btn" data-tab="skill">Learning Skills</button>
+                    <button class="tab-btn" data-tab="community">Community</button>
+                    <button class="tab-btn" data-tab="level">Level Progress</button>
+                    <button class="tab-btn" data-tab="earned">My Trophies</button>
+                </div>
+                
+                <!-- Popular Games Banner -->
+                <div class="mt-6 mb-6 p-4 bg-gradient-to-r from-emerald-900/30 to-blue-900/30 rounded-xl border border-emerald-700/30">
+                    <h3 class="font-bold text-lg mb-2 text-emerald-300">🎯 Popular Games to Earn Trophies:</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                            <span>Math Quest - Loved by 5,000+ students</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
+                            <span>Agri-Sim - Favored by 3,200+ rural students</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+                            <span>Science Lab VR - Most engaging for 4,100+</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Badges Grid -->
+                <div class="badge-grid" id="badgeGrid">
+                    <!-- Badges will be populated by JavaScript -->
+                </div>
+                
+                <!-- Progress & Tips -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-slate-900/50 rounded-xl">
+                        <h4 class="font-bold mb-2 text-emerald-400">💡 Tips to Earn More:</h4>
+                        <ul class="text-sm text-slate-300 space-y-1">
+                            <li>• Play different games to unlock category trophies</li>
+                            <li>• Maintain a daily streak for bonus XP</li>
+                            <li>• Help others in study groups</li>
+                            <li>• Aim for perfect scores in games</li>
+                            <li>• Play during special times (early/late)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="p-4 bg-slate-900/50 rounded-xl">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-400">Your Trophy Progress</span>
+                            <span id="achievementProgress">0%</span>
+                        </div>
+                        <div class="progress-bar bg-slate-800">
+                            <div class="progress-fill bg-yellow-500" id="achievementProgressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-3 text-xs text-slate-400">
+                            Earn more trophies to level up faster and unlock special rewards!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Games Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Continue Learning</h2>
+                    <a href="#" class="text-emerald-400 hover:text-emerald-300 flex items-center">
+                        View All <i data-feather="chevron-right" class="w-4 h-4 ml-1"></i>
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gamesGrid">
+                    <!-- Games will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Progress & Community -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Progress Chart -->
+                <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h3 class="text-xl font-bold mb-6">Learning Progress</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Mathematics</span>
+                                <span id="mathProgress">0%</span>
+                            </div>
+                            <div class="progress-bar bg-slate-700">
+                                <div class="progress-fill bg-emerald-500" id="mathBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Science</span>
+                                <span id="scienceProgress">0%</span>
+                            </div>
+                            <div class="progress-bar bg-slate-700">
+                                <div class="progress-fill bg-blue-500" id="scienceBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Agriculture</span>
+                                <span id="agriProgress">0%</span>
+                            </div>
+                            <div class="progress-bar bg-slate-700">
+                                <div class="progress-fill bg-green-500" id="agriBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Language</span>
+                                <span id="langProgress">0%</span>
+                            </div>
+                            <div class="progress-bar bg-slate-700">
+                                <div class="progress-fill bg-purple-500" id="langBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Community Activity -->
+                <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h3 class="text-xl font-bold mb-6">Community Activity</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="communityActivity">
+                        <div class="text-center p-4">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                                <i data-feather="users" class="w-8 h-8 text-emerald-400"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Village Rank</h4>
+                            <p class="text-slate-400 text-sm" id="villageRank">Not ranked yet</p>
+                        </div>
+                        <div class="text-center p-4">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                <i data-feather="award" class="w-8 h-8 text-blue-400"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Weekly Challenge</h4>
+                            <p class="text-slate-400 text-sm">Complete 5 games this week</p>
+                        </div>
+                        <div class="text-center p-4">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                <i data-feather="message-square" class="w-8 h-8 text-purple-400"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Study Groups</h4>
+                            <p class="text-slate-400 text-sm" id="studyGroups">0 active</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Badge Details Modal -->
+    <div class="badge-details-modal" id="badgeModal">
+        <div class="badge-details-content">
+            <button class="close-modal" id="closeModal">×</button>
+            <div class="text-center mb-6">
+                <div class="badge-icon mx-auto mb-4" id="modalBadgeIcon" style="width: 80px; height: 80px; font-size: 2.5rem;"></div>
+                <h3 class="text-xl font-bold mb-2" id="modalBadgeName">Badge Name</h3>
+                <p class="text-slate-300 mb-4" id="modalBadgeDesc">Description</p>
+                <div class="badge-xp text-lg" id="modalBadgeXP">+50 XP</div>
+            </div>
+            <div class="border-t border-slate-700 pt-4">
+                <h4 class="font-bold mb-2 text-emerald-400">Requirements:</h4>
+                <p class="text-sm text-slate-300 mb-4" id="modalBadgeReq">Complete specific tasks</p>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-xs text-slate-400">Category:</div>
+                        <div class="text-sm" id="modalBadgeCategory">Game Mastery</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">Game:</div>
+                        <div class="text-sm" id="modalBadgeGame">Math Quest</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div class="quiz-modal" id="quizModal">
+        <div class="quiz-modal-content">
+            <!-- Quiz content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Curriculum Modal -->
+    <div class="quiz-modal" id="curriculumModal">
+        <div class="quiz-modal-content">
+            <div class="quiz-question">
+                <div class="question-header">
+                    <h3 class="text-xl font-bold">Edit Curriculum</h3>
+                    <button class="close-modal text-slate-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="options-grid">
+                    <div class="mb-4">
+                        <label class="block text-slate-300 mb-2">Education Board</label>
+                        <select class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg" id="boardSelect">
+                            <option value="CBSE">CBSE</option>
+                            <option value="ICSE">ICSE</option>
+                            <option value="State Board">State Board</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-slate-300 mb-2">Class</label>
+                        <select class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg" id="classSelect">
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="nav-btn submit" id="saveCurriculum">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lessons Modal -->
+    <div class="quiz-modal" id="lessonsModal">
+        <div class="quiz-modal-content">
+            <div class="quiz-question">
+                <div class="question-header">
+                    <h3 class="text-xl font-bold" id="lessonsTitle">Lessons</h3>
+                    <button class="close-modal text-slate-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div id="lessonsList">
+                    <!-- Lessons will be loaded here -->
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="nav-btn next close-modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="components/header.js"></script>
+    <script>
+        // Initialize Feather icons
+        feather.replace();
+        
+        // Quiz System
+        class QuizSystem {
+            constructor(user) {
+                this.user = user;
+                this.quizzes = this.loadQuizzes();
+                this.userQuizzes = user.quizzes || {};
+            }
+
+            loadQuizzes() {
+                return {
+                    'math-quiz-1': {
+                        id: 'math-quiz-1',
+                        title: 'Basic Arithmetic',
+                        subject: 'Mathematics',
+                        class: '5-7',
+                        description: 'Test your basic math skills with addition, subtraction, multiplication, and division',
+                        duration: 10,
+                        questions: 10,
+                        xp: 100,
+                        difficulty: 'beginner',
+                        icon: '🧮',
+                        color1: '#3b82f6',
+                        color2: '#1d4ed8',
+                        questionsList: [
+                            {
+                                question: "What is 15 + 27?",
+                                options: ["32", "42", "52", "62"],
+                                correct: 1,
+                                explanation: "15 + 27 = 42"
+                            },
+                            {
+                                question: "What is 8 × 7?",
+                                options: ["48", "56", "64", "72"],
+                                correct: 1,
+                                explanation: "8 × 7 = 56"
+                            },
+                            {
+                                question: "What is 96 ÷ 8?",
+                                options: ["10", "12", "14", "16"],
+                                correct: 1,
+                                explanation: "96 ÷ 8 = 12"
+                            },
+                            {
+                                question: "What is 45 - 18?",
+                                options: ["27", "37", "47", "57"],
+                                correct: 0,
+                                explanation: "45 - 18 = 27"
+                            },
+                            {
+                                question: "What is 3² + 4²?",
+                                options: ["7", "12", "25", "49"],
+                                correct: 2,
+                                explanation: "3² = 9, 4² = 16, 9 + 16 = 25"
+                            }
+                        ]
+                    },
+                    'science-quiz-1': {
+                        id: 'science-quiz-1',
+                        title: 'Basic Science',
+                        subject: 'Science',
+                        class: '5-7',
+                        description: 'Test your knowledge of basic scientific concepts',
+                        duration: 12,
+                        questions: 10,
+                        xp: 120,
+                        difficulty: 'beginner',
+                        icon: '🔬',
+                        color1: '#8b5cf6',
+                        color2: '#7c3aed',
+                        questionsList: [
+                            {
+                                question: "What planet is known as the Red Planet?",
+                                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                                correct: 1,
+                                explanation: "Mars is called the Red Planet because of its reddish appearance"
+                            },
+                            {
+                                question: "What gas do plants absorb from the atmosphere?",
+                                options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+                                correct: 1,
+                                explanation: "Plants absorb carbon dioxide during photosynthesis"
+                            },
+                            {
+                                question: "What is the chemical symbol for water?",
+                                options: ["H2O", "CO2", "O2", "NaCl"],
+                                correct: 0,
+                                explanation: "H2O is the chemical formula for water"
+                            }
+                        ]
+                    },
+                    'english-quiz-1': {
+                        id: 'english-quiz-1',
+                        title: 'Vocabulary Builder',
+                        subject: 'English',
+                        class: '5-7',
+                        description: 'Improve your English vocabulary with this quiz',
+                        duration: 8,
+                        questions: 8,
+                        xp: 80,
+                        difficulty: 'beginner',
+                        icon: '📚',
+                        color1: '#f59e0b',
+                        color2: '#d97706',
+                        questionsList: [
+                            {
+                                question: "What is the synonym for 'happy'?",
+                                options: ["Sad", "Joyful", "Angry", "Tired"],
+                                correct: 1,
+                                explanation: "Joyful means very happy"
+                            },
+                            {
+                                question: "What is the opposite of 'big'?",
+                                options: ["Large", "Small", "Tall", "Wide"],
+                                correct: 1,
+                                explanation: "Small is the opposite of big"
+                            }
+                        ]
+                    },
+                    'agriculture-quiz-1': {
+                        id: 'agriculture-quiz-1',
+                        title: 'Basic Farming Knowledge',
+                        subject: 'Agriculture',
+                        class: '6-8',
+                        description: 'Test your knowledge of farming practices',
+                        duration: 15,
+                        questions: 12,
+                        xp: 150,
+                        difficulty: 'intermediate',
+                        icon: '🚜',
+                        color1: '#10b981',
+                        color2: '#059669',
+                        questionsList: [
+                            {
+                                question: "What is the best time to sow rice in most parts of India?",
+                                options: ["Winter", "Summer", "Monsoon", "Autumn"],
+                                correct: 2,
+                                explanation: "Rice is typically sown during the monsoon season"
+                            },
+                            {
+                                question: "Which crop is known as 'Golden Fiber'?",
+                                options: ["Cotton", "Jute", "Wheat", "Sugarcane"],
+                                correct: 1,
+                                explanation: "Jute is called Golden Fiber because of its golden color and importance"
+                            }
+                        ]
+                    }
+                };
+            }
+
+            startQuiz(quizId) {
+                const quiz = this.quizzes[quizId];
+                if (!quiz) return null;
+
+                this.currentQuiz = {
+                    ...quiz,
+                    startTime: Date.now(),
+                    currentQuestion: 0,
+                    score: 0,
+                    answers: [],
+                    completed: false
+                };
+
+                return this.currentQuiz;
+            }
+
+            submitAnswer(questionIndex, selectedOption) {
+                if (!this.currentQuiz || this.currentQuiz.completed) return null;
+
+                const question = this.currentQuiz.questionsList[questionIndex];
+                const isCorrect = question.correct === selectedOption;
+
+                this.currentQuiz.answers[questionIndex] = {
+                    selected: selectedOption,
+                    correct: isCorrect,
+                    time: Date.now()
+                };
+
+                if (isCorrect) {
+                    this.currentQuiz.score++;
+                }
+
+                return {
+                    correct: isCorrect,
+                    correctAnswer: question.correct,
+                    explanation: question.explanation
+                };
+            }
+
+            nextQuestion() {
+                if (!this.currentQuiz) return null;
+
+                this.currentQuiz.currentQuestion++;
+                
+                if (this.currentQuiz.currentQuestion >= this.currentQuiz.questionsList.length) {
+                    return this.completeQuiz();
+                }
+
+                return this.getCurrentQuestion();
+            }
+
+            getCurrentQuestion() {
+                if (!this.currentQuiz || this.currentQuiz.completed) return null;
+
+                const question = this.currentQuiz.questionsList[this.currentQuiz.currentQuestion];
+                return {
+                    ...question,
+                    questionNumber: this.currentQuiz.currentQuestion + 1,
+                    totalQuestions: this.currentQuiz.questionsList.length
+                };
+            }
+
+            completeQuiz() {
+                if (!this.currentQuiz || this.currentQuiz.completed) return null;
+
+                const endTime = Date.now();
+                const timeTaken = Math.floor((endTime - this.currentQuiz.startTime) / 1000);
+                const percentage = (this.currentQuiz.score / this.currentQuiz.questionsList.length) * 100;
+
+                const result = {
+                    quizId: this.currentQuiz.id,
+                    score: this.currentQuiz.score,
+                    totalQuestions: this.currentQuiz.questionsList.length,
+                    percentage: Math.round(percentage),
+                    timeTaken: timeTaken,
+                    xpEarned: Math.round((percentage / 100) * this.currentQuiz.xp),
+                    completed: true,
+                    completedAt: new Date().toISOString()
+                };
+
+                this.userQuizzes[this.currentQuiz.id] = result;
+                this.user.xp = (this.user.xp || 0) + result.xpEarned;
+                this.user.quizzes = this.userQuizzes;
+
+                if (localStorage.getItem('gameEdUser')) {
+                    localStorage.setItem('gameEdUser', JSON.stringify(this.user));
+                }
+
+                this.currentQuiz.completed = true;
+                return result;
+            }
+
+            getUserQuizStats() {
+                const completedQuizzes = Object.values(this.userQuizzes);
+                const totalQuizzes = completedQuizzes.length;
+                const totalXP = completedQuizzes.reduce((sum, quiz) => sum + (quiz.xpEarned || 0), 0);
+                const averageScore = totalQuizzes > 0 
+                    ? Math.round(completedQuizzes.reduce((sum, quiz) => sum + quiz.percentage, 0) / totalQuizzes)
+                    : 0;
+
+                return {
+                    totalQuizzes,
+                    totalXP,
+                    averageScore,
+                    completedQuizzes
+                };
+            }
+
+            renderQuizCard(quizId) {
+                const quiz = this.quizzes[quizId];
+                const completed = this.userQuizzes[quizId];
+                const completionRate = completed ? completed.percentage : 0;
+
+                return `
+                    <div class="quiz-card ${completed ? 'completed' : ''}" data-quiz="${quizId}">
+                        <div class="quiz-header">
+                            <div class="quiz-icon" style="background: linear-gradient(135deg, ${quiz.color1}, ${quiz.color2})">
+                                ${quiz.icon}
+                            </div>
+                            <div class="quiz-info">
+                                <h4>${quiz.title}</h4>
+                                <div class="quiz-meta">
+                                    <span class="quiz-subject">${quiz.subject}</span>
+                                    <span class="quiz-class">Class ${quiz.class}</span>
+                                    <span class="quiz-xp">+${quiz.xp} XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="quiz-desc">${quiz.description}</p>
+                        <div class="quiz-footer">
+                            <div class="quiz-stats">
+                                <span><i data-feather="clock"></i> ${quiz.duration}min</span>
+                                <span><i data-feather="list"></i> ${quiz.questions} Qs</span>
+                                <span><i data-feather="target"></i> ${quiz.difficulty}</span>
+                            </div>
+                            ${completed ? `
+                                <div class="quiz-result">
+                                    <div class="score-circle" style="--score: ${completionRate}">
+                                        <span>${completionRate}%</span>
+                                    </div>
+                                    <span class="xp-earned">+${completed.xpEarned} XP</span>
+                                </div>
+                            ` : `
+                                <button class="start-quiz-btn" data-quiz="${quizId}">
+                                    Start Quiz
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Curriculum System
+        class CurriculumSystem {
+            constructor(user) {
+                this.user = user;
+                this.boards = this.loadBoards();
+                this.lessons = this.loadLessons();
+                this.userCurriculum = user.curriculum || {
+                    board: user.board || 'CBSE',
+                    class: user.class || '8',
+                    subjects: user.subjects || []
+                };
+            }
+
+            loadBoards() {
+                return {
+                    'CBSE': {
+                        name: 'Central Board of Secondary Education',
+                        logo: '🏫',
+                        color: '#3b82f6'
+                    },
+                    'ICSE': {
+                        name: 'Indian Certificate of Secondary Education',
+                        logo: '📘',
+                        color: '#8b5cf6'
+                    },
+                    'State Board': {
+                        name: 'State Board',
+                        logo: '🏛️',
+                        color: '#10b981'
+                    },
+                    'Other': {
+                        name: 'Other Board',
+                        logo: '📚',
+                        color: '#f59e0b'
+                    }
+                };
+            }
+
+            loadLessons() {
+                return {
+                    'math-8': [
+                        {
+                            id: 'math-8-1',
+                            title: 'Rational Numbers',
+                            description: 'Understanding fractions, decimals, and rational numbers',
+                            duration: '45 min',
+                            difficulty: 'beginner',
+                            type: 'video',
+                            thumbnail: '🧮',
+                            xp: 50,
+                            completed: false
+                        },
+                        {
+                            id: 'math-8-2',
+                            title: 'Linear Equations',
+                            description: 'Solving equations with one variable',
+                            duration: '60 min',
+                            difficulty: 'intermediate',
+                            type: 'interactive',
+                            thumbnail: '📈',
+                            xp: 75,
+                            completed: false
+                        },
+                        {
+                            id: 'math-8-3',
+                            title: 'Understanding Quadrilaterals',
+                            description: 'Properties of quadrilaterals and practical applications',
+                            duration: '50 min',
+                            difficulty: 'beginner',
+                            type: 'reading',
+                            thumbnail: '📐',
+                            xp: 60,
+                            completed: false
+                        }
+                    ],
+                    'science-8': [
+                        {
+                            id: 'science-8-1',
+                            title: 'Crop Production',
+                            description: 'Learn about agricultural practices and crop management',
+                            duration: '55 min',
+                            difficulty: 'beginner',
+                            type: 'video',
+                            thumbnail: '🌱',
+                            xp: 70,
+                            completed: false
+                        },
+                        {
+                            id: 'science-8-2',
+                            title: 'Microorganisms',
+                            description: 'Friend and Foe - Understanding microbes',
+                            duration: '65 min',
+                            difficulty: 'intermediate',
+                            type: 'interactive',
+                            thumbnail: '🔬',
+                            xp: 85,
+                            completed: false
+                        }
+                    ],
+                    'english-8': [
+                        {
+                            id: 'english-8-1',
+                            title: 'Reading Comprehension',
+                            description: 'Improve reading skills with engaging stories',
+                            duration: '40 min',
+                            difficulty: 'beginner',
+                            type: 'reading',
+                            thumbnail: '📖',
+                            xp: 45,
+                            completed: false
+                        },
+                        {
+                            id: 'english-8-2',
+                            title: 'Grammar Basics',
+                            description: 'Parts of speech and sentence structure',
+                            duration: '50 min',
+                            difficulty: 'beginner',
+                            type: 'video',
+                            thumbnail: '📝',
+                            xp: 55,
+                            completed: false
+                        }
+                    ]
+                };
+            }
+
+            updateCurriculum(board, studentClass) {
+                this.userCurriculum.board = board;
+                this.userCurriculum.class = studentClass;
+                
+                this.user.curriculum = this.userCurriculum;
+                this.user.board = board;
+                this.user.class = studentClass;
+
+                if (localStorage.getItem('gameEdUser')) {
+                    localStorage.setItem('gameEdUser', JSON.stringify(this.user));
+                }
+
+                return this.userCurriculum;
+            }
+
+            getBoardInfo(boardId) {
+                return this.boards[boardId] || this.boards['Other'];
+            }
+
+            getLessonsForClass(board, studentClass) {
+                return this.lessons[`math-${studentClass}`] || 
+                       this.lessons[`science-${studentClass}`] || 
+                       this.lessons[`english-${studentClass}`] || [];
+            }
+
+            completeLesson(lessonId) {
+                let completed = false;
+                
+                Object.keys(this.lessons).forEach(key => {
+                    const lessonIndex = this.lessons[key].findIndex(lesson => lesson.id === lessonId);
+                    if (lessonIndex !== -1) {
+                        this.lessons[key][lessonIndex].completed = true;
+                        completed = true;
+                        
+                        const xp = this.lessons[key][lessonIndex].xp;
+                        this.user.xp = (this.user.xp || 0) + xp;
+                        
+                        if (!this.userCurriculum.lessons) {
+                            this.userCurriculum.lessons = [];
+                        }
+                        this.userCurriculum.lessons.push({
+                            id: lessonId,
+                            completedAt: new Date().toISOString(),
+                            xpEarned: xp
+                        });
+                    }
+                });
+
+                if (completed && localStorage.getItem('gameEdUser')) {
+                    localStorage.setItem('gameEdUser', JSON.stringify(this.user));
+                }
+
+                return completed;
+            }
+
+            renderCurriculumSection() {
+                const board = this.userCurriculum.board;
+                const studentClass = this.userCurriculum.class;
+                const boardInfo = this.getBoardInfo(board);
+
+                return `
+                    <div class="curriculum-section">
+                        <div class="curriculum-header">
+                            <div class="board-info">
+                                <div class="board-logo" style="background: ${boardInfo.color}">
+                                    ${boardInfo.logo}
+                                </div>
+                                <div>
+                                    <h3>${boardInfo.name}</h3>
+                                    <p class="class-info">Class ${studentClass}</p>
+                                </div>
+                            </div>
+                            <button class="edit-curriculum-btn">
+                                <i data-feather="edit-2"></i> Edit
+                            </button>
+                        </div>
+                        
+                        <div class="subjects-grid">
+                            ${this.renderSubjectCard('Mathematics', '🧮', '#3b82f6', 65)}
+                            ${this.renderSubjectCard('Science', '🔬', '#8b5cf6', 45)}
+                            ${this.renderSubjectCard('English', '📚', '#f59e0b', 70)}
+                            ${this.renderSubjectCard('Social Studies', '🗺️', '#10b981', 30)}
+                            ${this.renderSubjectCard('Computer', '💻', '#ec4899', 55)}
+                            ${this.renderSubjectCard('Agriculture', '🚜', '#22c55e', 80)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSubjectCard(subject, icon, color, progress) {
+                const lessonsCount = 8;
+                const completedLessons = Math.floor(progress / 100 * lessonsCount);
+
+                return `
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <div class="subject-icon" style="background: ${color}">
+                                ${icon}
+                            </div>
+                            <div class="subject-info">
+                                <h4>${subject}</h4>
+                                <p>${completedLessons}/${lessonsCount} lessons</p>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%; background: ${color}"></div>
+                            </div>
+                            <span class="progress-text">${progress}%</span>
+                        </div>
+                        <button class="view-lessons-btn" data-subject="${subject.toLowerCase()}">
+                            View Lessons
+                        </button>
+                    </div>
+                `;
+            }
+
+            renderLessonsModal(subject) {
+                const lessons = this.getLessonsForClass(this.userCurriculum.board, this.userCurriculum.class);
+                
+                if (lessons.length === 0) {
+                    return `
+                        <div class="no-lessons">
+                            <div class="no-lessons-icon">📚</div>
+                            <h3>No Lessons Available</h3>
+                            <p>Lessons for ${subject} - Class ${this.userCurriculum.class} will be added soon!</p>
+                        </div>
+                    `;
+                }
+
+                return lessons.map(lesson => `
+                    <div class="lesson-item ${lesson.completed ? 'completed' : ''}" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="lesson-thumbnail" style="width: 50px; height: 50px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                ${lesson.thumbnail}
+                            </div>
+                            <div class="lesson-details">
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">${lesson.title}</h4>
+                                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">${lesson.description}</p>
+                                <div class="lesson-meta" style="display: flex; gap: 1rem; font-size: 0.8rem; color: #94a3b8;">
+                                    <span><i data-feather="clock"></i> ${lesson.duration}</span>
+                                    <span><i data-feather="target"></i> ${lesson.difficulty}</span>
+                                    <span><i data-feather="star"></i> +${lesson.xp} XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="start-lesson-btn" data-lesson="${lesson.id}" style="background: ${lesson.completed ? '#10b981' : '#3b82f6'}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;">
+                            ${lesson.completed ? 'Completed ✓' : 'Start Lesson'}
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Achievements System
+        class AchievementsSystem {
+            constructor(user) {
+                this.user = user;
+                this.achievements = this.loadAchievements();
+                this.userAchievements = user.achievements || {};
+            }
+
+            loadAchievements() {
+                return {
+                    'new-learner': {
+                        id: 'new-learner',
+                        name: 'New Learner',
+                        description: 'Earn your first 100 XP',
+                        icon: '🌱',
+                        xp: 50,
+                        color1: '#10b981',
+                        color2: '#059669',
+                        category: 'milestone',
+                        requirement: { type: 'xp', value: 100 },
+                        requiredXP: 100
+                    },
+                    'rising-star': {
+                        id: 'rising-star',
+                        name: 'Rising Star',
+                        description: 'Reach 500 XP',
+                        icon: '⭐',
+                        xp: 100,
+                        color1: '#fbbf24',
+                        color2: '#f59e0b',
+                        category: 'level',
+                        requirement: { type: 'xp', value: 500 },
+                        requiredXP: 500
+                    },
+                    'xp-master': {
+                        id: 'xp-master',
+                        name: 'XP Master',
+                        description: 'Earn 1000 XP',
+                        icon: '🏆',
+                        xp: 200,
+                        color1: '#ec4899',
+                        color2: '#db2777',
+                        category: 'level',
+                        requirement: { type: 'xp', value: 1000 },
+                        requiredXP: 1000
+                    },
+                    'quiz-beginner': {
+                        id: 'quiz-beginner',
+                        name: 'Quiz Beginner',
+                        description: 'Complete your first quiz',
+                        icon: '📝',
+                        xp: 50,
+                        color1: '#3b82f6',
+                        color2: '#1d4ed8',
+                        category: 'quiz',
+                        requirement: { type: 'quizzes_completed', value: 1 }
+                    },
+                    'quiz-expert': {
+                        id: 'quiz-expert',
+                        name: 'Quiz Expert',
+                        description: 'Complete 5 quizzes',
+                        icon: '🎯',
+                        xp: 150,
+                        color1: '#8b5cf6',
+                        color2: '#7c3aed',
+                        category: 'quiz',
+                        requirement: { type: 'quizzes_completed', value: 5 }
+                    },
+                    'lesson-completer': {
+                        id: 'lesson-completer',
+                        name: 'Lesson Completer',
+                        description: 'Complete your first lesson',
+                        icon: '📚',
+                        xp: 75,
+                        color1: '#f59e0b',
+                        color2: '#d97706',
+                        category: 'lesson',
+                        requirement: { type: 'lessons_completed', value: 1 }
+                    },
+                    'game-player': {
+                        id: 'game-player',
+                        name: 'Game Player',
+                        description: 'Play your first game',
+                        icon: '🎮',
+                        xp: 50,
+                        color1: '#ef4444',
+                        color2: '#dc2626',
+                        category: 'game',
+                        requirement: { type: 'games_played', value: 1 }
+                    }
+                };
+            }
+
+            checkRequirement(requirement) {
+                switch (requirement.type) {
+                    case 'xp':
+                        return (this.user.totalXP || 0) >= requirement.value;
+                    case 'quizzes_completed':
+                        const quizzes = this.user.quizzes || {};
+                        return Object.keys(quizzes).length >= requirement.value;
+                    case 'lessons_completed':
+                        const lessons = this.user.curriculum?.lessons || [];
+                        return lessons.length >= requirement.value;
+                    case 'games_played':
+                        return (this.user.gamesPlayed || 0) >= requirement.value;
+                    default:
+                        return false;
+                }
+            }
+
+            checkAchievements() {
+                Object.values(this.achievements).forEach(achievement => {
+                    if (!this.userAchievements[achievement.id]) {
+                        if (this.checkRequirement(achievement.requirement)) {
+                            this.unlockAchievement(achievement);
+                        }
+                    }
+                });
+            }
+
+            unlockAchievement(achievement) {
+                this.userAchievements[achievement.id] = {
+                    earned: true,
+                    date: new Date().toISOString(),
+                    xpEarned: achievement.xp
+                };
+
+                this.user.xp = (this.user.xp || 0) + achievement.xp;
+                this.user.totalXP = (this.user.totalXP || 0) + achievement.xp;
+                this.user.achievements = this.userAchievements;
+
+                if (localStorage.getItem('gameEdUser')) {
+                    localStorage.setItem('gameEdUser', JSON.stringify(this.user));
+                }
+
+                this.showUnlockNotification(achievement);
+                return achievement;
+            }
+
+            showUnlockNotification(achievement) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-24 right-4 z-50 animate__animated animate__slideInRight';
+                notification.innerHTML = `
+                    <div class="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white p-4 rounded-xl shadow-2xl max-w-sm">
+                        <div class="flex items-center">
+                            <div class="text-3xl mr-3">${achievement.icon}</div>
+                            <div>
+                                <div class="font-bold">Achievement Unlocked! 🎉</div>
+                                <div class="text-sm opacity-90">${achievement.name}</div>
+                                <div class="text-xs mt-1">+${achievement.xp} XP Earned!</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.replace('animate__slideInRight', 'animate__slideOutRight');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+        }
+
+        // User data management
+        class UserData {
+            constructor() {
+                this.user = this.loadUserData();
+                this.quizSystem = new QuizSystem(this.user);
+                this.curriculumSystem = new CurriculumSystem(this.user);
+                this.achievementsSystem = new AchievementsSystem(this.user);
+                this.games = this.loadGames();
+            }
+            
+            loadUserData() {
+                const saved = localStorage.getItem('gameEdUser');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                
+                return {
+                    name: "Student",
+                    level: 1,
+                    xp: 250,
+                    totalXP: 250,
+                    gamesPlayed: 3,
+                    streak: 5,
+                    progress: {
+                        math: 30,
+                        science: 45,
+                        agriculture: 60,
+                        language: 25
+                    },
+                    villageRank: "Bronze Farmer",
+                    studyGroups: 2,
+                    earnedBadges: [1, 3, 5, 8]
+                };
+            }
+            
+            saveUserData() {
+                localStorage.setItem('gameEdUser', JSON.stringify(this.user));
+            }
+            
+            loadGames() {
+                return [
+                    {
+                        id: "math-quest",
+                        name: "Math Quest",
+                        description: "Solve math puzzles to earn XP",
+                        progress: 65,
+                        color: "blue",
+                        icon: "🧮"
+                    },
+                    {
+                        id: "agri-sim",
+                        name: "Agri-Sim",
+                        description: "Farm simulation for rural education",
+                        progress: 85,
+                        color: "green",
+                        icon: "🚜"
+                    },
+                    {
+                        id: "science-lab",
+                        name: "Science Lab VR",
+                        description: "Virtual science experiments",
+                        progress: 40,
+                        color: "purple",
+                        icon: "🔬"
+                    },
+                    {
+                        id: "word-master",
+                        name: "Word Master",
+                        description: "Vocabulary building game",
+                        progress: 30,
+                        color: "yellow",
+                        icon: "📚"
+                    },
+                    {
+                        id: "history-quest",
+                        name: "History Quest",
+                        description: "Explore historical events",
+                        progress: 20,
+                        color: "orange",
+                        icon: "🏛️"
+                    },
+                    {
+                        id: "eco-warrior",
+                        name: "Eco Warrior",
+                        description: "Environmental awareness game",
+                        progress: 50,
+                        color: "emerald",
+                        icon: "🌱"
+                    }
+                ];
+            }
+
+            loadGameBadges() {
+                return [
+                    {
+                        id: 'math-quest-badge',
+                        name: 'Math Adventurer',
+                        description: 'Complete Math Quest with 80% score',
+                        icon: '🧮',
+                        xp: 150,
+                        color1: '#3b82f6',
+                        color2: '#1d4ed8',
+                        game: 'math-quest',
+                        requiredXP: 500,
+                        earned: false
+                    },
+                    {
+                        id: 'agri-sim-badge',
+                        name: 'Farm Hero',
+                        description: 'Harvest 100 crops in Agri-Sim',
+                        icon: '🚜',
+                        xp: 200,
+                        color1: '#10b981',
+                        color2: '#059669',
+                        game: 'agri-sim',
+                        requiredXP: 800,
+                        earned: false
+                    },
+                    {
+                        id: 'science-lab-badge',
+                        name: 'Science Wizard',
+                        description: 'Complete all Science Lab experiments',
+                        icon: '🔬',
+                        xp: 175,
+                        color1: '#8b5cf6',
+                        color2: '#7c3aed',
+                        game: 'science-lab',
+                        requiredXP: 700,
+                        earned: false
+                    },
+                    {
+                        id: 'word-master-badge',
+                        name: 'Vocabulary King',
+                        description: 'Master 500 words in Word Master',
+                        icon: '📚',
+                        xp: 125,
+                        color1: '#f59e0b',
+                        color2: '#d97706',
+                        game: 'word-master',
+                        requiredXP: 400,
+                        earned: false
+                    },
+                    {
+                        id: 'quiz-master-badge',
+                        name: 'Quiz Champion',
+                        description: 'Complete 10 quizzes with 90%+ score',
+                        icon: '🏆',
+                        xp: 300,
+                        color1: '#ec4899',
+                        color2: '#db2777',
+                        game: 'quiz',
+                        requiredXP: 1500,
+                        earned: false
+                    },
+                    {
+                        id: 'lesson-complete-badge',
+                        name: 'Learning Star',
+                        description: 'Complete 20 lessons',
+                        icon: '⭐',
+                        xp: 250,
+                        color1: '#fbbf24',
+                        color2: '#eab308',
+                        game: 'lessons',
+                        requiredXP: 1000,
+                        earned: false
+                    }
+                ];
+            }
+            
+            addXP(amount) {
+                this.user.xp += amount;
+                this.user.totalXP += amount;
+                
+                const newLevel = Math.floor(this.user.totalXP / 1000) + 1;
+                if (newLevel > this.user.level) {
+                    this.user.level = newLevel;
+                    this.showLevelUp(newLevel);
+                }
+                
+                this.achievementsSystem.checkAchievements();
+                this.saveUserData();
+                this.updateUI();
+            }
+            
+            earnBadge(badgeId) {
+                if (!this.user.earnedBadges.includes(badgeId)) {
+                    this.user.earnedBadges.push(badgeId);
+                    const badge = this.achievements.badges.find(b => b.id === badgeId);
+                    if (badge) {
+                        this.addXP(badge.xp);
+                        this.showBadgeUnlock(badge);
+                    }
+                    this.saveUserData();
+                    this.updateAchievements();
+                }
+            }
+            
+            showLevelUp(level) {
+                alert(`🎉 Congratulations! You reached Level ${level}!`);
+            }
+            
+            showBadgeUnlock(badge) {
+                const modal = document.getElementById('badgeModal');
+                document.getElementById('modalBadgeName').textContent = badge.name;
+                document.getElementById('modalBadgeDesc').textContent = badge.description;
+                document.getElementById('modalBadgeXP').textContent = `+${badge.xp} XP`;
+                document.getElementById('modalBadgeIcon').innerHTML = badge.icon;
+                document.getElementById('modalBadgeIcon').style.background = `linear-gradient(135deg, ${badge.color1}, ${badge.color2})`;
+                
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('unlock-animation');
+                }, 100);
+            }
+            
+            updateUI() {
+                document.getElementById('userName').textContent = this.user.name;
+                document.getElementById('greetingName').textContent = this.user.name;
+                document.getElementById('userLevel').textContent = `Level ${this.user.level}`;
+                document.getElementById('userAvatar').textContent = this.user.name.charAt(0);
+                
+                const totalXP = this.user.totalXP || 0;
+                const level = Math.floor(totalXP / 1000) + 1;
+                const xpInCurrentLevel = totalXP - ((level - 1) * 1000);
+                const xpForNextLevel = level * 1000;
+                const xpPercentage = (xpInCurrentLevel / 1000) * 100;
+                
+                document.getElementById('xpProgress').textContent = `${xpInCurrentLevel}/${xpForNextLevel}`;
+                document.getElementById('xpBar').style.width = `${xpPercentage}%`;
+                document.getElementById('headerXP').textContent = totalXP;
+                document.getElementById('statXP').textContent = totalXP;
+                document.getElementById('statLevel').textContent = level;
+                document.getElementById('nextLevelXP').textContent = `${xpForNextLevel} XP`;
+                
+                document.getElementById('totalXP').textContent = totalXP;
+                document.getElementById('gamesPlayed').textContent = this.user.gamesPlayed;
+                document.getElementById('badgesCount').textContent = this.user.earnedBadges.length;
+                document.getElementById('streak').textContent = `${this.user.streak} days`;
+                document.getElementById('statGames').textContent = this.user.gamesPlayed;
+                document.getElementById('statStreak').textContent = this.user.streak;
+                
+                document.getElementById('mathProgress').textContent = `${this.user.progress.math}%`;
+                document.getElementById('mathBar').style.width = `${this.user.progress.math}%`;
+                document.getElementById('scienceProgress').textContent = `${this.user.progress.science}%`;
+                document.getElementById('scienceBar').style.width = `${this.user.progress.science}%`;
+                document.getElementById('agriProgress').textContent = `${this.user.progress.agriculture}%`;
+                document.getElementById('agriBar').style.width = `${this.user.progress.agriculture}%`;
+                document.getElementById('langProgress').textContent = `${this.user.progress.language}%`;
+                document.getElementById('langBar').style.width = `${this.user.progress.language}%`;
+                
+                document.getElementById('villageRank').textContent = this.user.villageRank;
+                document.getElementById('studyGroups').textContent = `${this.user.studyGroups} active`;
+                
+                const earnedCount = this.user.earnedBadges.length;
+                const totalCount = 10; // Assuming 10 badges total
+                const progressPercentage = Math.round((earnedCount / totalCount) * 100);
+                
+                document.getElementById('earnedCount').textContent = earnedCount;
+                document.getElementById('totalCount').textContent = totalCount;
+                document.getElementById('achievementProgress').textContent = `${progressPercentage}%`;
+                document.getElementById('achievementProgressBar').style.width = `${progressPercentage}%`;
+                
+                this.updateXPDisplay();
+                this.updateQuizzes();
+                this.updateCurriculum();
+                this.updateGameBadges();
+                this.updateGames();
+            }
+
+            updateXPDisplay() {
+                const totalXP = this.user.totalXP || 0;
+                const level = Math.floor(totalXP / 1000) + 1;
+                const xpInLevel = totalXP - ((level - 1) * 1000);
+                const xpForNextLevel = level * 1000;
+                const xpNeeded = xpForNextLevel - totalXP;
+                const progressPercentage = (xpInLevel / 1000) * 100;
+                
+                document.getElementById('currentXP').textContent = totalXP.toLocaleString();
+                document.getElementById('currentLevel').textContent = level;
+                document.getElementById('nextLevelXPNeeded').textContent = xpNeeded > 0 ? xpNeeded : 'MAX';
+                document.getElementById('levelProgress').textContent = `${Math.round(progressPercentage)}%`;
+                document.getElementById('levelProgressBar').style.width = `${progressPercentage}%`;
+                
+                this.user.level = level;
+                this.user.xp = xpInLevel;
+            }
+
+            updateQuizzes() {
+                const quizStats = this.quizSystem.getUserQuizStats();
+                const quizzesGrid = document.getElementById('quizzesGrid');
+                const quizStatsElement = document.getElementById('quizStats');
+                const quizXPElement = document.getElementById('quizXP');
+                const quizzesDoneElement = document.getElementById('quizzesDone');
+                
+                if (quizStatsElement) {
+                    quizStatsElement.textContent = `${quizStats.totalQuizzes} quizzes completed`;
+                }
+                
+                if (quizXPElement) {
+                    quizXPElement.textContent = `${quizStats.totalXP} XP earned`;
+                }
+
+                if (quizzesDoneElement) {
+                    quizzesDoneElement.textContent = quizStats.totalQuizzes;
+                }
+                
+                if (quizzesGrid) {
+                    quizzesGrid.innerHTML = '';
+                    Object.keys(this.quizSystem.quizzes).forEach(quizId => {
+                        quizzesGrid.innerHTML += this.quizSystem.renderQuizCard(quizId);
+                    });
+                    
+                    document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            this.startQuiz(btn.dataset.quiz);
+                        });
+                    });
+                    
+                    feather.replace();
+                }
+            }
+
+            updateCurriculum() {
+                const curriculumSection = document.getElementById('curriculum-section');
+                if (curriculumSection) {
+                    curriculumSection.innerHTML = this.curriculumSystem.renderCurriculumSection();
+                    
+                    document.querySelectorAll('.edit-curriculum-btn').forEach(btn => {
+                        btn.addEventListener('click', () => this.showCurriculumModal());
+                    });
+                    
+                    document.querySelectorAll('.view-lessons-btn').forEach(btn => {
+                        btn.addEventListener('click', () => this.showLessonsModal(btn.dataset.subject));
+                    });
+
+                    feather.replace();
+                }
+            }
+
+            updateGameBadges() {
+                const gameBadgesGrid = document.getElementById('gameBadgesGrid');
+                if (gameBadgesGrid) {
+                    const badges = this.loadGameBadges();
+                    const totalXP = this.user.totalXP || 0;
+                    
+                    gameBadgesGrid.innerHTML = badges.map(badge => {
+                        const isEarned = totalXP >= badge.requiredXP;
+                        const progress = Math.min((totalXP / badge.requiredXP) * 100, 100);
+                        
+                        return `
+                            <div class="text-center">
+                                <div class="badge-card ${isEarned ? 'earned' : 'locked'} mb-3" 
+                                     style="--badge-color-1: ${badge.color1}; --badge-color-2: ${badge.color2}">
+                                    ${!isEarned ? `
+                                        <div class="badge-locked">
+                                            <i data-feather="lock" class="w-6 h-6"></i>
+                                        </div>
+                                    ` : ''}
+                                    <div class="badge-icon ${isEarned ? 'unlock-animation' : ''}">
+                                        ${badge.icon}
+                                    </div>
+                                    <div class="badge-name">${badge.name}</div>
+                                    <div class="badge-xp">+${badge.xp} XP</div>
+                                </div>
+                                <div class="text-xs text-slate-400">
+                                    ${isEarned ? 'Unlocked!' : `${badge.requiredXP} XP needed`}
+                                </div>
+                                ${!isEarned ? `
+                                    <div class="mt-2">
+                                        <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                                            <div class="h-full" style="width: ${progress}%; background: linear-gradient(to right, ${badge.color1}, ${badge.color2})"></div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    feather.replace();
+                }
+            }
+
+            updateGames() {
+                const gamesGrid = document.getElementById('gamesGrid');
+                gamesGrid.innerHTML = '';
+                
+                this.games.forEach(game => {
+                    const gameCard = document.createElement('div');
+                    gameCard.className = 'game-card rounded-xl p-6';
+                    gameCard.onclick = () => launchGame(game.id);
+                    
+                    gameCard.innerHTML = `
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-full bg-${game.color}-500/20 flex items-center justify-center text-2xl">
+                                ${game.icon}
+                            </div>
+                            <span class="text-sm px-3 py-1 rounded-full bg-slate-800">${game.progress}%</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">${game.name}</h3>
+                        <p class="text-slate-400 mb-4">${game.description}</p>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-400">Progress</span>
+                            <span>${game.progress}%</span>
+                        </div>
+                        <div class="progress-bar bg-slate-800">
+                            <div class="progress-fill" style="width: ${game.progress}%; background: var(--color-${game.color})"></div>
+                        </div>
+                    `;
+                    
+                    gamesGrid.appendChild(gameCard);
+                });
+            }
+
+            startQuiz(quizId) {
+                const quiz = this.quizSystem.startQuiz(quizId);
+                if (!quiz) return;
+                
+                this.loadQuizQuestion();
+                document.getElementById('quizModal').style.display = 'flex';
+            }
+
+            loadQuizQuestion() {
+                const question = this.quizSystem.getCurrentQuestion();
+                if (!question) return;
+                
+                const modalContent = document.querySelector('#quizModal .quiz-modal-content');
+                const progress = ((question.questionNumber - 1) / question.totalQuestions) * 100;
+                
+                modalContent.innerHTML = `
+                    <div class="quiz-question">
+                        <div class="question-header">
+                            <div class="question-number">Question ${question.questionNumber} of ${question.totalQuestions}</div>
+                            <div class="question-timer">⏱️ 10:00</div>
+                        </div>
+                        
+                        <div class="question-text">${question.question}</div>
+                        
+                        <div class="options-grid">
+                            ${question.options.map((option, index) => `
+                                <button class="option-btn" data-option="${index}">
+                                    ${String.fromCharCode(65 + index)}. ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="quiz-navigation">
+                            <div class="quiz-progress">
+                                <div class="quiz-progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            
+                            <div class="navigation-buttons">
+                                ${question.questionNumber < question.totalQuestions ? `
+                                    <button class="nav-btn next" id="nextQuestion">
+                                        Next Question
+                                    </button>
+                                ` : `
+                                    <button class="nav-btn submit" id="submitQuiz">
+                                        Submit Quiz
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modalContent.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const selectedOption = parseInt(e.target.dataset.option);
+                        this.handleAnswer(selectedOption);
+                    });
+                });
+                
+                if (modalContent.querySelector('#nextQuestion')) {
+                    modalContent.querySelector('#nextQuestion').addEventListener('click', () => {
+                        this.quizSystem.nextQuestion();
+                        this.loadQuizQuestion();
+                    });
+                }
+                
+                if (modalContent.querySelector('#submitQuiz')) {
+                    modalContent.querySelector('#submitQuiz').addEventListener('click', () => {
+                        this.completeQuiz();
+                    });
+                }
+            }
+
+            handleAnswer(selectedOption) {
+                const result = this.quizSystem.submitAnswer(
+                    this.quizSystem.currentQuiz.currentQuestion,
+                    selectedOption
+                );
+                
+                if (!result) return;
+                
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach((btn, index) => {
+                    btn.classList.remove('selected');
+                    if (index === selectedOption) {
+                        btn.classList.add('selected');
+                        btn.classList.add(result.correct ? 'correct' : 'incorrect');
+                    }
+                    if (index === result.correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            completeQuiz() {
+                const result = this.quizSystem.completeQuiz();
+                if (!result) return;
+                
+                const modalContent = document.querySelector('#quizModal .quiz-modal-content');
+                
+                modalContent.innerHTML = `
+                    <div class="quiz-results">
+                        <div class="results-icon">🏆</div>
+                        <h2 class="results-title">Quiz Completed!</h2>
+                        <div class="results-score">${result.score}/${result.totalQuestions}</div>
+                        <div class="results-total">${result.percentage}% Score</div>
+                        
+                        <div class="results-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">+${result.xpEarned}</div>
+                                <div class="stat-label">XP Earned</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${Math.floor(result.timeTaken / 60)}:${(result.timeTaken % 60).toString().padStart(2, '0')}</div>
+                                <div class="stat-label">Time Taken</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${result.percentage}%</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-actions">
+                            <button class="nav-btn next" id="closeQuizModal">
+                                Close
+                            </button>
+                            <button class="nav-btn submit" id="retryQuiz">
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                modalContent.querySelector('#closeQuizModal').addEventListener('click', () => {
+                    document.getElementById('quizModal').style.display = 'none';
+                    this.updateUI();
+                });
+                
+                modalContent.querySelector('#retryQuiz').addEventListener('click', () => {
+                    this.startQuiz(result.quizId);
+                });
+                
+                this.addXP(result.xpEarned);
+            }
+
+            showCurriculumModal() {
+                const modal = document.getElementById('curriculumModal');
+                const currentBoard = this.user.board || 'CBSE';
+                const currentClass = this.user.class || '8';
+                
+                document.getElementById('boardSelect').value = currentBoard;
+                document.getElementById('classSelect').value = currentClass;
+                
+                modal.style.display = 'flex';
+                
+                document.getElementById('saveCurriculum').onclick = () => {
+                    const board = document.getElementById('boardSelect').value;
+                    const studentClass = document.getElementById('classSelect').value;
+                    
+                    this.curriculumSystem.updateCurriculum(board, studentClass);
+                    this.updateCurriculum();
+                    
+                    modal.style.display = 'none';
+                };
+            }
+
+            showLessonsModal(subject) {
+                const modal = document.getElementById('lessonsModal');
+                const lessonsList = document.getElementById('lessonsList');
+                
+                document.getElementById('lessonsTitle').textContent = `${subject} Lessons`;
+                lessonsList.innerHTML = this.curriculumSystem.renderLessonsModal(subject);
+                
+                modal.style.display = 'flex';
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.start-lesson-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const lessonId = btn.dataset.lesson;
+                            this.completeLesson(lessonId);
+                        });
+                    });
+                    feather.replace();
+                }, 100);
+            }
+
+            completeLesson(lessonId) {
+                const completed = this.curriculumSystem.completeLesson(lessonId);
+                if (completed) {
+                    let xpEarned = 0;
+                    Object.keys(this.curriculumSystem.lessons).forEach(key => {
+                        const lesson = this.curriculumSystem.lessons[key].find(l => l.id === lessonId);
+                        if (lesson) {
+                            xpEarned = lesson.xp;
+                        }
+                    });
+                    
+                    this.showNotification(`Lesson completed! +${xpEarned} XP earned!`, 'success');
+                    this.updateUI();
+                    this.showLessonsModal('Mathematics');
+                }
+            }
+
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg z-50 transform transition-transform duration-300 ${
+                    type === 'success' ? 'bg-emerald-600' : 
+                    type === 'error' ? 'bg-red-600' : 
+                    'bg-blue-600'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i data-feather="${
+                            type === 'success' ? 'check-circle' : 
+                            type === 'error' ? 'alert-circle' : 
+                            'info'
+                        }" class="w-5 h-5 mr-3"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                feather.replace();
+                
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            updateAchievements() {
+                const badgeGrid = document.getElementById('badgeGrid');
+                const earnedBadges = this.user.earnedBadges;
+                const badges = this.achievements.badges;
+                
+                badgeGrid.innerHTML = '';
+                
+                badges.forEach(badge => {
+                    const isEarned = earnedBadges.includes(badge.id);
+                    const hasGame = badge.game !== null;
+                    
+                    const badgeCard = document.createElement('div');
+                    badgeCard.className = `badge-card ${isEarned ? 'earned' : ''} ${hasGame ? 'has-game' : ''}`;
+                    if (badge.game) {
+                        badgeCard.setAttribute('data-game', badge.game);
+                    }
+                    badgeCard.style.setProperty('--badge-color-1', badge.color1);
+                    badgeCard.style.setProperty('--badge-color-2', badge.color2);
+                    
+                    badgeCard.innerHTML = `
+                        <div class="badge-icon" style="background: linear-gradient(135deg, ${badge.color1}, ${badge.color2})">
+                            ${badge.icon}
+                        </div>
+                        <div class="badge-name">${badge.name}</div>
+                        <div class="badge-desc">${badge.description}</div>
+                        <div class="badge-xp">+${badge.xp} XP</div>
+                        ${!isEarned ? '<div class="badge-locked"><i data-feather="lock"></i></div>' : ''}
+                    `;
+                    
+                    badgeCard.addEventListener('click', () => this.showBadgeDetails(badge));
+                    badgeGrid.appendChild(badgeCard);
+                });
+                
+                feather.replace();
+            }
+        }
+        
+        // Game launching function
+        function launchGame(gameId) {
+            alert(`Launching ${gameId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}...\n\nGame functionality would be implemented here.`);
+            
+            const xpGained = Math.floor(Math.random() * 50) + 25;
+            userData.addXP(xpGained);
+            userData.user.gamesPlayed++;
+            
+            if (Math.random() > 0.7) {
+                const unearnedBadges = userData.achievements.badges.filter(b => 
+                    !userData.user.earnedBadges.includes(b.id)
+                );
+                if (unearnedBadges.length > 0) {
+                    const randomBadge = unearnedBadges[Math.floor(Math.random() * unearnedBadges.length)];
+                    userData.earnBadge(randomBadge.id);
+                }
+            }
+            
+            userData.saveUserData();
+            userData.updateUI();
+        }
+        
+        // Initialize the application
+        const userData = new UserData();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize UI
+            userData.updateUI();
+            userData.updateAchievements();
+            
+            // Mobile menu functionality
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            if (mobileMenuBtn && sidebar && sidebarOverlay) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    sidebarOverlay.classList.toggle('active');
+                });
+                
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+            
+            // Tab functionality
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterBadges(btn.dataset.tab);
+                });
+            });
+            
+            // Modal functionality
+            const closeModalBtn = document.getElementById('closeModal');
+            const closeModalBtn2 = document.getElementById('closeModalBtn');
+            const modal = document.getElementById('badgeModal');
+            
+            if (closeModalBtn && modal) {
+                closeModalBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    modal.classList.remove('unlock-animation');
+                });
+            }
+            
+            if (closeModalBtn2 && modal) {
+                closeModalBtn2.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    modal.classList.remove('unlock-animation');
+                });
+            }
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('unlock-animation');
+                }
+            });
+            
+            // Play random game button
+            const playRandomBtn = document.getElementById('playRandomGame');
+            if (playRandomBtn) {
+                playRandomBtn.addEventListener('click', () => {
+                    const games = ['math-quest', 'agri-sim', 'science-lab', 'word-master'];
+                    const randomGame = games[Math.floor(Math.random() * games.length)];
+                    launchGame(randomGame);
+                });
+            }
+            
+            // Logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to logout?')) {
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
+            
+            // Filter badges function
+            function filterBadges(filter) {
+                const badges = userData.achievements.badges;
+                const earnedBadges = userData.user.earnedBadges;
+                
+                if (filter === 'all') {
+                    userData.updateAchievements();
+                    return;
+                }
+                
+                if (filter === 'earned') {
+                    const filteredBadges = badges.filter(badge => earnedBadges.includes(badge.id));
+                    renderFilteredBadges(filteredBadges);
+                    return;
+                }
+                
+                const filteredBadges = badges.filter(badge => badge.category === filter);
+                renderFilteredBadges(filteredBadges);
+            }
+            
+            function renderFilteredBadges(filteredBadges) {
+                const badgeGrid = document.getElementById('badgeGrid');
+                const earnedBadges = userData.user.earnedBadges;
+                
+                badgeGrid.innerHTML = '';
+                
+                filteredBadges.forEach(badge => {
+                    const isEarned = earnedBadges.includes(badge.id);
+                    const hasGame = badge.game !== null;
+                    
+                    const badgeCard = document.createElement('div');
+                    badgeCard.className = `badge-card ${isEarned ? 'earned' : ''} ${hasGame ? 'has-game' : ''}`;
+                    if (badge.game) {
+                        badgeCard.setAttribute('data-game', badge.game);
+                    }
+                    badgeCard.style.setProperty('--badge-color-1', badge.color1);
+                    badgeCard.style.setProperty('--badge-color-2', badge.color2);
+                    
+                    badgeCard.innerHTML = `
+                        <div class="badge-icon" style="background: linear-gradient(135deg, ${badge.color1}, ${badge.color2})">
+                            ${badge.icon}
+                        </div>
+                        <div class="badge-name">${badge.name}</div>
+                        <div class="badge-desc">${badge.description}</div>
+                        <div class="badge-xp">+${badge.xp} XP</div>
+                        ${!isEarned ? '<div class="badge-locked"><i data-feather="lock"></i></div>' : ''}
+                    `;
+                    
+                    badgeCard.addEventListener('click', () => userData.showBadgeDetails(badge));
+                    badgeGrid.appendChild(badgeCard);
+                });
+                
+                feather.replace();
+            }
+            
+            // Close modals functionality
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.quiz-modal').style.display = 'none';
+                });
+            });
+            
+            // Close modals on outside click
+            document.querySelectorAll('.quiz-modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Smooth scroll for sidebar links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                        
+                        // Close mobile menu if open
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.remove('active');
+                            sidebarOverlay.classList.remove('active');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
