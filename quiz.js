@@ -4,6 +4,7 @@ class QuizSystem {
         this.user = user;
         this.quizzes = this.loadQuizzes();
         this.userQuizzes = user.quizzes || {};
+        this.currentQuiz = null;
     }
 
     loadQuizzes() {
@@ -14,8 +15,8 @@ class QuizSystem {
                 subject: 'Mathematics',
                 class: '5-7',
                 description: 'Test your basic math skills with addition, subtraction, multiplication, and division',
-                duration: 10, // minutes
-                questions: 10,
+                duration: 10,
+                questions: 5,
                 xp: 100,
                 difficulty: 'beginner',
                 icon: '🧮',
@@ -61,7 +62,7 @@ class QuizSystem {
                 class: '5-7',
                 description: 'Test your knowledge of basic scientific concepts',
                 duration: 12,
-                questions: 10,
+                questions: 3,
                 xp: 120,
                 difficulty: 'beginner',
                 icon: '🔬',
@@ -95,7 +96,7 @@ class QuizSystem {
                 class: '5-7',
                 description: 'Improve your English vocabulary with this quiz',
                 duration: 8,
-                questions: 8,
+                questions: 2,
                 xp: 80,
                 difficulty: 'beginner',
                 icon: '📚',
@@ -123,7 +124,7 @@ class QuizSystem {
                 class: '6-8',
                 description: 'Test your knowledge of farming practices',
                 duration: 15,
-                questions: 12,
+                questions: 2,
                 xp: 150,
                 difficulty: 'intermediate',
                 icon: '🚜',
@@ -213,7 +214,7 @@ class QuizSystem {
         if (!this.currentQuiz || this.currentQuiz.completed) return null;
 
         const endTime = Date.now();
-        const timeTaken = Math.floor((endTime - this.currentQuiz.startTime) / 1000); // in seconds
+        const timeTaken = Math.floor((endTime - this.currentQuiz.startTime) / 1000);
         const percentage = (this.currentQuiz.score / this.currentQuiz.questionsList.length) * 100;
 
         const result = {
@@ -227,22 +228,16 @@ class QuizSystem {
             completedAt: new Date().toISOString()
         };
 
-        // Save quiz result
         this.userQuizzes[this.currentQuiz.id] = result;
-
-        // Add XP to user
         this.user.xp = (this.user.xp || 0) + result.xpEarned;
+        this.user.totalXP = (this.user.totalXP || 0) + result.xpEarned;
         this.user.quizzes = this.userQuizzes;
 
-        // Save user data
         if (localStorage.getItem('gameEdUser')) {
             localStorage.setItem('gameEdUser', JSON.stringify(this.user));
-        } else {
-            sessionStorage.setItem('gameEdUser', JSON.stringify(this.user));
         }
 
         this.currentQuiz.completed = true;
-
         return result;
     }
 
@@ -292,7 +287,7 @@ class QuizSystem {
                     ${completed ? `
                         <div class="quiz-result">
                             <div class="score-circle" style="--score: ${completionRate}">
-                                ${completionRate}%
+                                <span>${completionRate}%</span>
                             </div>
                             <span class="xp-earned">+${completed.xpEarned} XP</span>
                         </div>
@@ -305,21 +300,9 @@ class QuizSystem {
             </div>
         `;
     }
+}
 
-    showQuizModal(quizId) {
-        const quiz = this.quizzes[quizId];
-        const modal = document.getElementById('quizModal');
-        
-        if (!modal) return;
-
-        document.getElementById('quizTitle').textContent = quiz.title;
-        document.getElementById('quizSubject').textContent = quiz.subject;
-        document.getElementById('quizDescription').textContent = quiz.description;
-        document.getElementById('quizXP').textContent = `+${quiz.xp} XP`;
-        document.getElementById('quizDuration').textContent = `${quiz.duration} minutes`;
-        document.getElementById('quizQuestions').textContent = `${quiz.questions} questions`;
-        document.getElementById('quizDifficulty').textContent = quiz.difficulty;
-
-        modal.style.display = 'flex';
-    }
+// Export for use in dashboard
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = QuizSystem;
 }
