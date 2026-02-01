@@ -120,6 +120,30 @@ class CurriculumSystem {
                     xp: 55,
                     completed: false
                 }
+            ],
+            'agriculture-8': [
+                {
+                    id: 'agriculture-8-1',
+                    title: 'Organic Farming',
+                    description: 'Learn sustainable farming practices',
+                    duration: '50 min',
+                    difficulty: 'beginner',
+                    type: 'video',
+                    thumbnail: '🌿',
+                    xp: 65,
+                    completed: false
+                },
+                {
+                    id: 'agriculture-8-2',
+                    title: 'Soil Types',
+                    description: 'Understanding different soil types and their properties',
+                    duration: '45 min',
+                    difficulty: 'beginner',
+                    type: 'interactive',
+                    thumbnail: '🟫',
+                    xp: 55,
+                    completed: false
+                }
             ]
         };
     }
@@ -128,12 +152,10 @@ class CurriculumSystem {
         this.userCurriculum.board = board;
         this.userCurriculum.class = studentClass;
         
-        // Update user data
         this.user.curriculum = this.userCurriculum;
         this.user.board = board;
         this.user.class = studentClass;
 
-        // Save to localStorage
         if (localStorage.getItem('gameEdUser')) {
             localStorage.setItem('gameEdUser', JSON.stringify(this.user));
         }
@@ -145,42 +167,40 @@ class CurriculumSystem {
         return this.boards[boardId] || this.boards['Other'];
     }
 
-    getLessonsForClass(board, studentClass) {
-        // For now, return lessons based on class
-        // In a real app, this would fetch based on board and class
-        return this.lessons[`math-${studentClass}`] || 
-               this.lessons[`science-${studentClass}`] || 
-               this.lessons[`english-${studentClass}`] || [];
+    getLessonsForSubject(subject) {
+        const studentClass = this.userCurriculum.class || '8';
+        const subjectKey = `${subject.toLowerCase()}-${studentClass}`;
+        return this.lessons[subjectKey] || [];
     }
 
     completeLesson(lessonId) {
-        // Mark lesson as completed and award XP
         let completed = false;
         
-        // Search through all lessons
         Object.keys(this.lessons).forEach(key => {
             const lessonIndex = this.lessons[key].findIndex(lesson => lesson.id === lessonId);
             if (lessonIndex !== -1) {
                 this.lessons[key][lessonIndex].completed = true;
                 completed = true;
                 
-                // Award XP
                 const xp = this.lessons[key][lessonIndex].xp;
                 this.user.xp = (this.user.xp || 0) + xp;
+                this.user.totalXP = (this.user.totalXP || 0) + xp;
                 
-                // Update user lessons progress
                 if (!this.userCurriculum.lessons) {
                     this.userCurriculum.lessons = [];
                 }
-                this.userCurriculum.lessons.push({
-                    id: lessonId,
-                    completedAt: new Date().toISOString(),
-                    xpEarned: xp
-                });
+                
+                // Check if lesson already completed
+                if (!this.userCurriculum.lessons.some(l => l.id === lessonId)) {
+                    this.userCurriculum.lessons.push({
+                        id: lessonId,
+                        completedAt: new Date().toISOString(),
+                        xpEarned: xp
+                    });
+                }
             }
         });
 
-        // Save user data
         if (completed && localStorage.getItem('gameEdUser')) {
             localStorage.setItem('gameEdUser', JSON.stringify(this.user));
         }
@@ -223,8 +243,10 @@ class CurriculumSystem {
     }
 
     renderSubjectCard(subject, icon, color, progress) {
-        const lessonsCount = 8; // Example count
-        const completedLessons = Math.floor(progress / 100 * lessonsCount);
+        const lessons = this.getLessonsForSubject(subject);
+        const completedLessons = lessons.filter(lesson => lesson.completed).length;
+        const totalLessons = lessons.length;
+        const actualProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : progress;
 
         return `
             <div class="subject-card">
@@ -234,14 +256,14 @@ class CurriculumSystem {
                     </div>
                     <div class="subject-info">
                         <h4>${subject}</h4>
-                        <p>${completedLessons}/${lessonsCount} lessons</p>
+                        <p>${completedLessons}/${totalLessons} lessons</p>
                     </div>
                 </div>
                 <div class="progress-container">
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progress}%; background: ${color}"></div>
+                        <div class="progress-fill" style="width: ${actualProgress}%; background: ${color}"></div>
                     </div>
-                    <span class="progress-text">${progress}%</span>
+                    <span class="progress-text">${actualProgress}%</span>
                 </div>
                 <button class="view-lessons-btn" data-subject="${subject.toLowerCase()}">
                     View Lessons
@@ -251,7 +273,7 @@ class CurriculumSystem {
     }
 
     renderLessonsModal(subject) {
-        const lessons = this.getLessonsForClass(this.userCurriculum.board, this.userCurriculum.class);
+        const lessons = this.getLessonsForSubject(subject);
         
         if (lessons.length === 0) {
             return `
@@ -264,23 +286,30 @@ class CurriculumSystem {
         }
 
         return lessons.map(lesson => `
-            <div class="lesson-item ${lesson.completed ? 'completed' : ''}">
-                <div class="lesson-thumbnail">
-                    ${lesson.thumbnail}
-                </div>
-                <div class="lesson-details">
-                    <h4>${lesson.title}</h4>
-                    <p>${lesson.description}</p>
-                    <div class="lesson-meta">
-                        <span><i data-feather="clock"></i> ${lesson.duration}</span>
-                        <span><i data-feather="target"></i> ${lesson.difficulty}</span>
-                        <span><i data-feather="star"></i> +${lesson.xp} XP</span>
+            <div class="lesson-item ${lesson.completed ? 'completed' : ''}" style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="lesson-thumbnail" style="width: 50px; height: 50px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        ${lesson.thumbnail}
+                    </div>
+                    <div class="lesson-details">
+                        <h4 style="font-weight: 600; margin-bottom: 0.25rem;">${lesson.title}</h4>
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem;">${lesson.description}</p>
+                        <div class="lesson-meta" style="display: flex; gap: 1rem; font-size: 0.8rem; color: #94a3b8;">
+                            <span><i data-feather="clock"></i> ${lesson.duration}</span>
+                            <span><i data-feather="target"></i> ${lesson.difficulty}</span>
+                            <span><i data-feather="star"></i> +${lesson.xp} XP</span>
+                        </div>
                     </div>
                 </div>
-                <button class="start-lesson-btn" data-lesson="${lesson.id}">
+                <button class="start-lesson-btn" data-lesson="${lesson.id}" style="background: ${lesson.completed ? '#10b981' : '#3b82f6'}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;">
                     ${lesson.completed ? 'Completed ✓' : 'Start Lesson'}
                 </button>
             </div>
         `).join('');
     }
+}
+
+// Export for use in dashboard
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CurriculumSystem;
 }
