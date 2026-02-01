@@ -1492,6 +1492,9 @@
     </div>
 
     <script src="components/header.js"></script>
+    <script src="quiz.js"></script>
+<script src="curriculum.js"></script>
+<script src="achievements-enhanced.js"></script>
     <script>
         // Initialize Feather icons
         feather.replace();
@@ -2245,12 +2248,12 @@
         // User data management
         class UserData {
             constructor() {
-                this.user = this.loadUserData();
-                this.quizSystem = new QuizSystem(this.user);
-                this.curriculumSystem = new CurriculumSystem(this.user);
-                this.achievementsSystem = new AchievementsSystem(this.user);
-                this.games = this.loadGames();
-            }
+    this.user = this.loadUserData();
+    this.quizSystem = new QuizSystem(this.user);
+    this.curriculumSystem = new CurriculumSystem(this.user);
+    this.achievementsSystem = new AchievementsSystem(this.user);
+    this.games = this.loadGames();
+}
             
             loadUserData() {
                 const saved = localStorage.getItem('gameEdUser');
