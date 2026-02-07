@@ -1,7 +1,4 @@
-# Team Details
-Team Name: Taskforce 141
-
-Team Members: 
+# 👨‍💻 Team Taskforce 141
   1. Tanish Jain
   2. Siya Sharma
   3. Harjas Singh Dhami
