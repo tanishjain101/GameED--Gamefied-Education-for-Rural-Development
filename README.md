@@ -83,10 +83,9 @@ For Teachers:
 
 
 # 📖 Getting Started
-  For Students & Educators
-    1.Clone and Open: git clone https://github.com/tanishjain101/GameED--Gamefied-Education-for-Rural-Development.git
-    2.Simply open the **index.html** file in your web browser to start.
-    3.Create an account, select your curriculum (CBSE, ICSE, etc.), and begin your gamified learning journey!
+  1. Clone and Open: git clone https://github.com/tanishjain101/GameED--Gamefied-Education-for-Rural-Development.git
+  2. Simply open the **index.html** file in your web browser to start.
+  3. Create an account, select your curriculum (CBSE, ICSE, etc.), and begin your gamified learning journe
 
 # 🔧 Customization
 Adding New Games:
