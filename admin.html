@@ -6,12 +6,247 @@
     <title>Admin Panel - GameEd Rural</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --color-primary: #C40C0C;
+            --color-secondary: #FF6500;
+            --color-accent: #CC561E;
+            --color-highlight: #F6CE71;
+        }
+        
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #064e3b 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             color: white;
             padding-top: 70px;
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 101, 0, 0.2);
+            border-color: rgba(255, 101, 0, 0.3);
+        }
+        
+        .primary-bg {
+            background: linear-gradient(135deg, var(--color-primary), #A00808);
+        }
+        
+        .secondary-bg {
+            background: linear-gradient(135deg, var(--color-secondary), #E55A00);
+        }
+        
+        .accent-bg {
+            background: linear-gradient(135deg, var(--color-accent), #B34915);
+        }
+        
+        .highlight-bg {
+            background: linear-gradient(135deg, var(--color-highlight), #E4B95F);
+        }
+        
+        .primary-text {
+            color: var(--color-primary);
+        }
+        
+        .secondary-text {
+            color: var(--color-secondary);
+        }
+        
+        .accent-text {
+            color: var(--color-accent);
+        }
+        
+        .highlight-text {
+            color: var(--color-highlight);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #A00808);
+            border: 1px solid rgba(196, 12, 12, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A00808, #850606);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(196, 12, 12, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--color-secondary), #E55A00);
+            border: 1px solid rgba(255, 101, 0, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #E55A00, #CC4A00);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 101, 0, 0.3);
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, var(--color-accent), #B34915);
+            border: 1px solid rgba(204, 86, 30, 0.3);
+        }
+        
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #B34915, #9A3E12);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(204, 86, 30, 0.3);
+        }
+        
+        .btn-highlight {
+            background: linear-gradient(135deg, var(--color-highlight), #E4B95F);
+            border: 1px solid rgba(246, 206, 113, 0.3);
+            color: #1a1a2e;
+        }
+        
+        .btn-highlight:hover {
+            background: linear-gradient(135deg, #E4B95F, #D4A94F);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(246, 206, 113, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            border: 2px solid rgba(255, 101, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            border: 3px solid rgba(255, 101, 0, 0.3);
+            border-top: 3px solid var(--color-secondary);
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .tab-btn {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 101, 0, 0.3);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 101, 0, 0.1);
+        }
+        
+        .filter-tag {
+            background: rgba(255, 101, 0, 0.2);
+            border: 1px solid rgba(255, 101, 0, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .primary-progress {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        }
+        
+        .secondary-progress {
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-accent));
+        }
+        
+        .accent-progress {
+            background: linear-gradient(90deg, var(--color-accent), var(--color-highlight));
+        }
+        
+        .highlight-progress {
+            background: linear-gradient(90deg, var(--color-highlight), #FFE4A3);
+        }
+        
+        .user-row:hover {
+            background: linear-gradient(90deg, rgba(255, 101, 0, 0.05), transparent);
+        }
+        
+        .card-primary {
+            border-left: 4px solid var(--color-primary);
+            background: linear-gradient(135deg, rgba(196, 12, 12, 0.1), transparent);
+        }
+        
+        .card-secondary {
+            border-left: 4px solid var(--color-secondary);
+            background: linear-gradient(135deg, rgba(255, 101, 0, 0.1), transparent);
+        }
+        
+        .card-accent {
+            border-left: 4px solid var(--color-accent);
+            background: linear-gradient(135deg, rgba(204, 86, 30, 0.1), transparent);
+        }
+        
+        .card-highlight {
+            border-left: 4px solid var(--color-highlight);
+            background: linear-gradient(135deg, rgba(246, 206, 113, 0.1), transparent);
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(255, 101, 0, 0.3);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(255, 101, 0, 0.6);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
@@ -19,73 +254,215 @@
     <custom-header></custom-header>
     
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-6">👨‍💼 Admin Panel</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h3 class="text-xl font-bold mb-4">📊 Statistics</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span>Total Users:</span>
-                        <span id="totalUsers" class="font-bold">0</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Active Today:</span>
-                        <span id="activeUsers" class="font-bold">0</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Avg XP:</span>
-                        <span id="avgXP" class="font-bold">0</span>
-                    </div>
-                </div>
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold secondary-text">👨‍💼 GameEd Admin Panel</h1>
+                <p class="text-slate-300">Manage users, content, and platform analytics</p>
             </div>
-            
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h3 class="text-xl font-bold mb-4">⚡ Quick Actions</h3>
-                <div class="space-y-3">
-                    <button onclick="exportUsers()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                        Export Users Data
-                    </button>
-                    <button onclick="clearDemoData()" class="w-full py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg">
-                        Clear Demo Data
-                    </button>
-                    <button onclick="addTestUser()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
-                        Add Test User
-                    </button>
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-slate-400">
+                    <i data-feather="database" class="w-4 h-4 inline-block mr-1 secondary-text"></i>
+                    <span id="storageUsage">0 KB used</span>
                 </div>
-            </div>
-            
-            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-                <h3 class="text-xl font-bold mb-4">🔧 Tools</h3>
-                <div class="space-y-3">
-                    <button onclick="viewLocalStorage()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">
-                        View All Local Storage
-                    </button>
-                    <button onclick="resetAllData()" class="w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg">
-                        Reset All Data
-                    </button>
-                </div>
+                <button onclick="exportAllData()" class="px-4 py-2 btn-secondary rounded-lg font-medium">
+                    Export All Data
+                </button>
             </div>
         </div>
         
-        <div class="bg-slate-800/50 rounded-xl border border-slate-700 p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">👥 Registered Users</h2>
-                <div class="text-sm text-slate-400">
-                    Showing <span id="showingCount">0</span> users
+        <!-- ==== PHASE 1: REAL-TIME ANALYTICS DASHBOARD ==== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Card 1: User Growth -->
+            <div class="stat-card card-primary p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-slate-300 text-sm">Total Users</p>
+                        <h3 class="text-2xl font-bold primary-text" id="totalUsers">0</h3>
+                        <p class="secondary-text text-sm mt-1">
+                            <i data-feather="trending-up" class="w-4 h-4 inline-block mr-1"></i>
+                            <span id="newUsersToday">+0 today</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#C40C0C] to-[#A00808] flex items-center justify-center glow">
+                        <i data-feather="users" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">Active users: <span class="secondary-text" id="activeUsers24h">0</span> in last 24h</div>
+            </div>
+            
+            <!-- Card 2: Engagement -->
+            <div class="stat-card card-secondary p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-slate-300 text-sm">Active Now</p>
+                        <h3 class="text-2xl font-bold secondary-text" id="activeNow">0</h3>
+                        <p class="accent-text text-sm mt-1">
+                            <i data-feather="activity" class="w-4 h-4 inline-block mr-1"></i>
+                            <span id="avgSessionTime">0m avg session</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6500] to-[#E55A00] flex items-center justify-center">
+                        <i data-feather="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">Peak time: <span class="highlight-text" id="peakTime">-</span></div>
+            </div>
+            
+            <!-- Card 3: Learning Progress -->
+            <div class="stat-card card-accent p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-slate-300 text-sm">Avg XP per User</p>
+                        <h3 class="text-2xl font-bold accent-text" id="avgXP">0</h3>
+                        <p class="highlight-text text-sm mt-1">
+                            <i data-feather="award" class="w-4 h-4 inline-block mr-1"></i>
+                            <span id="totalBadgesEarned">0 badges</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#CC561E] to-[#B34915] flex items-center justify-center">
+                        <i data-feather="star" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">Completion rate: <span class="primary-text font-semibold" id="completionRate">0%</span></div>
+            </div>
+            
+            <!-- Card 4: Popular Content -->
+            <div class="stat-card card-highlight p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-slate-300 text-sm">Top Game</p>
+                        <h3 class="text-2xl font-bold highlight-text" id="topGame">-</h3>
+                        <p class="primary-text text-sm mt-1">
+                            <i data-feather="play" class="w-4 h-4 inline-block mr-1"></i>
+                            <span id="topGamePlays">0 plays</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#F6CE71] to-[#E4B95F] flex items-center justify-center">
+                        <i data-feather="trending-up" class="w-6 h-6 text-gray-900"></i>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">Most badges: <span class="accent-text font-semibold" id="mostBadgesGame">-</span></div>
+            </div>
+        </div>
+        
+        <!-- ==== PHASE 1: ENHANCED USER SEARCH & FILTERS ==== -->
+        <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold secondary-text mb-2">👥 User Management</h2>
+                    <p class="text-slate-400">Search, filter, and manage all registered users</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showBulkActions()" class="px-4 py-2 btn-secondary rounded-lg font-medium">
+                        <i data-feather="users" class="w-4 h-4 inline-block mr-2"></i>
+                        Bulk Actions
+                    </button>
+                    <button onclick="showAddUserModal()" class="px-4 py-2 btn-primary rounded-lg font-medium">
+                        <i data-feather="user-plus" class="w-4 h-4 inline-block mr-2"></i>
+                        Add User
+                    </button>
                 </div>
             </div>
             
+            <!-- Search and Filter Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Search -->
+                <div>
+                    <label class="block text-slate-300 text-sm mb-2">Search Users</label>
+                    <input type="text" 
+                           id="userSearch" 
+                           placeholder="Name, email, username..."
+                           class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                           onkeyup="filterUsers()">
+                </div>
+                
+                <!-- Filter by Level -->
+                <div>
+                    <label class="block text-slate-300 text-sm mb-2">Level Range</label>
+                    <div class="flex gap-2">
+                        <input type="number" 
+                               id="minLevel" 
+                               placeholder="Min"
+                               class="w-1/2 px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                               onchange="filterUsers()">
+                        <input type="number" 
+                               id="maxLevel" 
+                               placeholder="Max"
+                               class="w-1/2 px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                               onchange="filterUsers()">
+                    </div>
+                </div>
+                
+                <!-- Filter by XP -->
+                <div>
+                    <label class="block text-slate-300 text-sm mb-2">XP Range</label>
+                    <div class="flex gap-2">
+                        <input type="number" 
+                               id="minXP" 
+                               placeholder="Min XP"
+                               class="w-1/2 px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                               onchange="filterUsers()">
+                        <input type="number" 
+                               id="maxXP" 
+                               placeholder="Max XP"
+                               class="w-1/2 px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                               onchange="filterUsers()">
+                    </div>
+                </div>
+                
+                <!-- Filter by Region -->
+                <div>
+                    <label class="block text-slate-300 text-sm mb-2">Region</label>
+                    <select id="regionFilter" 
+                            class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg focus:outline-none focus:border-[#FF6500] text-white"
+                            onchange="filterUsers()">
+                        <option value="">All Regions</option>
+                        <option value="rural">Rural</option>
+                        <option value="urban">Urban</option>
+                        <option value="semi-urban">Semi-Urban</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Active Filters Display -->
+            <div class="mb-4" id="activeFilters">
+                <div class="text-sm text-slate-400 mb-2">Active Filters:</div>
+                <div class="flex flex-wrap gap-2" id="filterTags">
+                    <!-- Filter tags will appear here -->
+                </div>
+            </div>
+            
+            <!-- Clear Filters Button -->
+            <button onclick="clearAllFilters()" 
+                    class="mb-6 px-4 py-2 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg text-sm text-slate-300">
+                <i data-feather="x" class="w-4 h-4 inline-block mr-2"></i>
+                Clear All Filters
+            </button>
+            
+            <!-- User Table -->
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-slate-900/50">
-                        <tr>
-                            <th class="py-3 px-4 text-left">ID</th>
-                            <th class="py-3 px-4 text-left">Username</th>
-                            <th class="py-3 px-4 text-left">Email</th>
-                            <th class="py-3 px-4 text-left">Name</th>
-                            <th class="py-3 px-4 text-left">Region</th>
-                            <th class="py-3 px-4 text-left">Joined</th>
+                    <thead>
+                        <tr class="bg-[#16213e] border-b border-[#FF6500]/30">
+                            <th class="py-3 px-4 text-left">
+                                <input type="checkbox" id="selectAllUsers" onchange="toggleSelectAll()">
+                            </th>
+                            <th class="py-3 px-4 text-left cursor-pointer hover:text-[#FF6500] transition-colors" onclick="sortUsers('name')">
+                                Name <i data-feather="chevron-down" class="w-4 h-4 inline-block"></i>
+                            </th>
+                            <th class="py-3 px-4 text-left cursor-pointer hover:text-[#FF6500] transition-colors" onclick="sortUsers('email')">
+                                Email
+                            </th>
+                            <th class="py-3 px-4 text-left cursor-pointer hover:text-[#FF6500] transition-colors" onclick="sortUsers('level')">
+                                Level/XP
+                            </th>
+                            <th class="py-3 px-4 text-left cursor-pointer hover:text-[#FF6500] transition-colors" onclick="sortUsers('region')">
+                                Region
+                            </th>
+                            <th class="py-3 px-4 text-left cursor-pointer hover:text-[#FF6500] transition-colors" onclick="sortUsers('joined')">
+                                Joined
+                            </th>
                             <th class="py-3 px-4 text-left">Actions</th>
                         </tr>
                     </thead>
@@ -95,96 +472,1356 @@
                 </table>
             </div>
             
-            <div class="mt-6 text-center text-slate-400" id="noUsersMessage">
-                No users found. Create some accounts first!
+            <!-- No Users Message -->
+            <div class="mt-6 text-center text-slate-400 hidden" id="noUsersMessage">
+                <i data-feather="users" class="w-12 h-12 mx-auto mb-4 text-[#FF6500]/50"></i>
+                <p>No users found matching your filters</p>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-between items-center">
+                <div class="text-sm text-slate-400">
+                    Showing <span class="secondary-text font-semibold" id="showingStart">0</span>-<span class="secondary-text font-semibold" id="showingEnd">0</span> of 
+                    <span class="secondary-text font-semibold" id="showingCount">0</span> users
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="prevPage()" class="px-4 py-2 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg disabled:opacity-50" id="prevBtn">
+                        <i data-feather="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <span class="px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-sm" id="pageInfo">Page 1</span>
+                    <button onclick="nextPage()" class="px-4 py-2 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg disabled:opacity-50" id="nextBtn">
+                        <i data-feather="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==== PHASE 1: BULK USER OPERATIONS ==== -->
+        <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6 mb-8">
+            <h3 class="text-xl font-bold secondary-text mb-4">⚡ Quick Bulk Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="bulkSendEmail()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#FF6500]/20 flex items-center gap-3 transition-all hover:border-[#FF6500]/40 hover:translate-y-[-2px]">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6500]/20 to-[#E55A00]/20 flex items-center justify-center">
+                        <i data-feather="mail" class="w-5 h-5 secondary-text"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-semibold secondary-text">Send Bulk Email</div>
+                        <div class="text-sm text-slate-400">Email selected users</div>
+                    </div>
+                </button>
+                
+                <button onclick="bulkGrantAchievement()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#CC561E]/20 flex items-center gap-3 transition-all hover:border-[#CC561E]/40 hover:translate-y-[-2px]">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#CC561E]/20 to-[#B34915]/20 flex items-center justify-center">
+                        <i data-feather="award" class="w-5 h-5 accent-text"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-semibold accent-text">Grant Achievement</div>
+                        <div class="text-sm text-slate-400">Award badge to selected</div>
+                    </div>
+                </button>
+                
+                <button onclick="bulkExportSelected()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#F6CE71]/20 flex items-center gap-3 transition-all hover:border-[#F6CE71]/40 hover:translate-y-[-2px]">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#F6CE71]/20 to-[#E4B95F]/20 flex items-center justify-center">
+                        <i data-feather="download" class="w-5 h-5 highlight-text"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-semibold highlight-text">Export Selected</div>
+                        <div class="text-sm text-slate-400">Download user data</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- ==== PHASE 1: BASIC GAME/CONTENT MANAGEMENT ==== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Game Management -->
+            <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold secondary-text">🎮 Game Management</h3>
+                    <button onclick="showAddGameModal()" class="px-4 py-2 btn-primary rounded-lg text-sm">
+                        Add Game
+                    </button>
+                </div>
+                
+                <div class="space-y-4" id="gamesList">
+                    <!-- Games will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Content Management -->
+            <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold secondary-text">📚 Content Overview</h3>
+                    <div class="text-sm text-slate-400">
+                        <span class="secondary-text font-semibold" id="totalLessons">0</span> lessons, 
+                        <span class="accent-text font-semibold" id="totalQuizzes">0</span> quizzes
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-[#16213e] rounded-lg border border-[#FF6500]/10 hover:border-[#FF6500]/30 transition-colors">
+                        <div>
+                            <div class="font-semibold secondary-text">Math Content</div>
+                            <div class="text-sm text-slate-400">3 lessons, 1 quiz</div>
+                        </div>
+                        <button onclick="editContent('math')" class="px-3 py-1 btn-secondary rounded text-sm">
+                            Edit
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3 bg-[#16213e] rounded-lg border border-[#CC561E]/10 hover:border-[#CC561E]/30 transition-colors">
+                        <div>
+                            <div class="font-semibold accent-text">Science Content</div>
+                            <div class="text-sm text-slate-400">2 lessons, 1 quiz</div>
+                        </div>
+                        <button onclick="editContent('science')" class="px-3 py-1 btn-secondary rounded text-sm">
+                            Edit
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3 bg-[#16213e] rounded-lg border border-[#F6CE71]/10 hover:border-[#F6CE71]/30 transition-colors">
+                        <div>
+                            <div class="font-semibold highlight-text">Agriculture Content</div>
+                            <div class="text-sm text-slate-400">2 lessons, 1 quiz</div>
+                        </div>
+                        <button onclick="editContent('agriculture')" class="px-3 py-1 btn-secondary rounded text-sm">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==== PHASE 1: SIMPLE REPORTING ==== -->
+        <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6 mb-8">
+            <h3 class="text-xl font-bold secondary-text mb-6">📊 Quick Reports</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Performance Chart -->
+                <div>
+                    <h4 class="font-semibold mb-4 secondary-text">User Level Distribution</h4>
+                    <div class="h-64">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Regional Distribution -->
+                <div>
+                    <h4 class="font-semibold mb-4 accent-text">Regional Distribution</h4>
+                    <div class="h-64">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Report Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="generateUserReport()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#C40C0C]/20 flex items-center gap-3 transition-all hover:border-[#C40C0C]/40">
+                    <i data-feather="users" class="w-5 h-5 primary-text"></i>
+                    <div class="text-left">
+                        <div class="font-semibold primary-text">User Report</div>
+                        <div class="text-sm text-slate-400">Export user statistics</div>
+                    </div>
+                </button>
+                
+                <button onclick="generateProgressReport()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#FF6500]/20 flex items-center gap-3 transition-all hover:border-[#FF6500]/40">
+                    <i data-feather="trending-up" class="w-5 h-5 secondary-text"></i>
+                    <div class="text-left">
+                        <div class="font-semibold secondary-text">Progress Report</div>
+                        <div class="text-sm text-slate-400">Learning progress analytics</div>
+                    </div>
+                </button>
+                
+                <button onclick="generateGameReport()" class="p-4 bg-[#16213e] hover:bg-[#1a1a2e] rounded-lg border border-[#CC561E]/20 flex items-center gap-3 transition-all hover:border-[#CC561E]/40">
+                    <i data-feather="bar-chart-2" class="w-5 h-5 accent-text"></i>
+                    <div class="text-left">
+                        <div class="font-semibold accent-text">Game Analytics</div>
+                        <div class="text-sm text-slate-400">Game performance data</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- ==== PHASE 1: SYSTEM STATUS ==== -->
+        <div class="bg-[#1a1a2e] rounded-xl border border-[#FF6500]/20 p-6">
+            <h3 class="text-xl font-bold secondary-text mb-4">🔧 System Status</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-4 bg-[#16213e] rounded-lg border border-[#FF6500]/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-semibold secondary-text">Storage Usage</div>
+                        <div class="secondary-text font-bold" id="storagePercent">0%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill secondary-progress" id="storageBar" style="width: 0%"></div>
+                    </div>
+                    <div class="text-sm text-slate-400 mt-2" id="storageDetails">0 KB / 5 MB</div>
+                </div>
+                
+                <div class="p-4 bg-[#16213e] rounded-lg border border-[#CC561E]/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-semibold accent-text">Active Sessions</div>
+                        <div class="accent-text font-bold" id="activeSessions">0</div>
+                    </div>
+                    <div class="text-sm text-slate-400">Last backup: <span class="highlight-text" id="lastBackup">Never</span></div>
+                    <button onclick="runBackup()" class="mt-3 px-3 py-1 btn-accent rounded text-sm">
+                        Backup Now
+                    </button>
+                </div>
+                
+                <div class="p-4 bg-[#16213e] rounded-lg border border-[#C40C0C]/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-semibold primary-text">Error Logs</div>
+                        <div class="primary-text font-bold" id="errorCount">0</div>
+                    </div>
+                    <div class="text-sm text-slate-400">Last error: <span class="secondary-text" id="lastError">None</span></div>
+                    <button onclick="viewErrorLogs()" class="mt-3 px-3 py-1 btn-primary rounded text-sm">
+                        View Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== MODALS ==== -->
+    
+    <!-- Bulk Actions Modal -->
+    <div class="modal" id="bulkActionsModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold secondary-text">Bulk User Actions</h3>
+                <button onclick="closeModal('bulkActionsModal')" class="text-slate-400 hover:text-[#FF6500]">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 mb-2">Action to Perform</label>
+                    <select id="bulkActionType" class="w-full px-4 py-3 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                        <option value="">Select Action</option>
+                        <option value="email">Send Email</option>
+                        <option value="achievement">Grant Achievement</option>
+                        <option value="xp">Add XP</option>
+                        <option value="level">Change Level</option>
+                        <option value="delete">Delete Users</option>
+                    </select>
+                </div>
+                
+                <div id="bulkActionDetails">
+                    <!-- Dynamic content based on action -->
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="executeBulkAction()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Execute Action
+                    </button>
+                    <button onclick="closeModal('bulkActionsModal')" class="flex-1 py-3 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold secondary-text">Add New User</h3>
+                <button onclick="closeModal('addUserModal')" class="text-slate-400 hover:text-[#FF6500]">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-2">First Name</label>
+                        <input type="text" id="newFirstName" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2">Last Name</label>
+                        <input type="text" id="newLastName" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-slate-300 mb-2">Email</label>
+                    <input type="email" id="newEmail" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-300 mb-2">Username</label>
+                    <input type="text" id="newUsername" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-300 mb-2">Password</label>
+                    <input type="password" id="newPassword" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-2">Region</label>
+                        <select id="newRegion" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                            <option value="rural">Rural</option>
+                            <option value="urban">Urban</option>
+                            <option value="semi-urban">Semi-Urban</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2">Role</label>
+                        <select id="newRole" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mt-6">
+                    <button onclick="createNewUser()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Create User
+                    </button>
+                    <button onclick="closeModal('addUserModal')" class="flex-1 py-3 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Details Modal -->
+    <div class="modal" id="userDetailsModal">
+        <div class="modal-content">
+            <!-- User details will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Add Game Modal -->
+    <div class="modal" id="addGameModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold secondary-text">Add New Game</h3>
+                <button onclick="closeModal('addGameModal')" class="text-slate-400 hover:text-[#FF6500]">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 mb-2">Game Name</label>
+                    <input type="text" id="gameName" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-300 mb-2">Description</label>
+                    <textarea id="gameDescription" rows="3" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-2">Category</label>
+                        <select id="gameCategory" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                            <option value="math">Math</option>
+                            <option value="science">Science</option>
+                            <option value="agriculture">Agriculture</option>
+                            <option value="language">Language</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2">Base XP</label>
+                        <input type="number" id="gameXP" value="50" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mt-6">
+                    <button onclick="createNewGame()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Add Game
+                    </button>
+                    <button onclick="closeModal('addGameModal')" class="flex-1 py-3 bg-[#16213e] hover:bg-[#1a1a2e] border border-[#FF6500]/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="components/header.js"></script>
     <script>
+        // ===== GLOBAL VARIABLES =====
+        let allUsers = [];
+        let filteredUsers = [];
+        let selectedUserIds = new Set();
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let currentSort = { field: 'joined', direction: 'desc' };
+        let activeFilters = {};
+
+        // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function() {
             feather.replace();
-            loadUsers();
+            loadAllData();
+            setupCharts();
+            setInterval(updateRealTimeStats, 30000); // Update every 30 seconds
         });
-        
-        function loadUsers() {
-            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
-            const tableBody = document.getElementById('usersTableBody');
-            const noUsersMessage = document.getElementById('noUsersMessage');
+
+        // ===== PHASE 1: REAL-TIME ANALYTICS =====
+        function loadAllData() {
+            allUsers = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
+            filteredUsers = [...allUsers];
             
-            // Update statistics
-            document.getElementById('totalUsers').textContent = users.length;
-            document.getElementById('showingCount').textContent = users.length;
+            updateRealTimeStats();
+            renderUsersTable();
+            loadGamesList();
+            updateSystemStatus();
+        }
+
+        function updateRealTimeStats() {
+            // Total Users
+            document.getElementById('totalUsers').textContent = allUsers.length;
             
-            // Calculate average XP
-            const avgXP = users.length > 0 
-                ? Math.round(users.reduce((sum, user) => sum + (user.totalXP || 0), 0) / users.length)
-                : 0;
-            document.getElementById('avgXP').textContent = avgXP;
-            
-            // Calculate active users (joined today)
+            // New Users Today
             const today = new Date().toDateString();
-            const activeToday = users.filter(user => {
+            const newToday = allUsers.filter(user => {
                 const joinDate = new Date(user.joined || user.createdAt).toDateString();
                 return joinDate === today;
             }).length;
-            document.getElementById('activeUsers').textContent = activeToday;
+            document.getElementById('newUsersToday').textContent = `+${newToday} today`;
             
-            if (users.length === 0) {
+            // Active Users (last 24h)
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const active24h = allUsers.filter(user => {
+                const lastLogin = user.lastLogin ? new Date(user.lastLogin) : new Date(user.joined);
+                return lastLogin > twentyFourHoursAgo;
+            }).length;
+            document.getElementById('activeUsers24h').textContent = active24h;
+            
+            // Active Now (last 15 minutes)
+            const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+            const activeNow = allUsers.filter(user => {
+                const lastLogin = user.lastLogin ? new Date(user.lastLogin) : new Date(user.joined);
+                return lastLogin > fifteenMinutesAgo;
+            }).length;
+            document.getElementById('activeNow').textContent = activeNow;
+            
+            // Average XP
+            const avgXP = allUsers.length > 0 
+                ? Math.round(allUsers.reduce((sum, user) => sum + (user.totalXP || 0), 0) / allUsers.length)
+                : 0;
+            document.getElementById('avgXP').textContent = avgXP.toLocaleString();
+            
+            // Total Badges Earned
+            const totalBadges = allUsers.reduce((sum, user) => {
+                return sum + (user.badges ? user.badges.length : 0) + 
+                       (user.achievements ? Object.keys(user.achievements).length : 0);
+            }, 0);
+            document.getElementById('totalBadgesEarned').textContent = `${totalBadges} badges`;
+            
+            // Average Session Time (mock data for now)
+            document.getElementById('avgSessionTime').textContent = '8m avg session';
+            
+            // Peak Time (mock data)
+            document.getElementById('peakTime').textContent = '2-4 PM';
+            
+            // Completion Rate
+            const completedQuizzes = allUsers.reduce((sum, user) => {
+                return sum + (user.quizzes ? Object.keys(user.quizzes).length : 0);
+            }, 0);
+            const completionRate = allUsers.length > 0 
+                ? Math.round((completedQuizzes / (allUsers.length * 4)) * 100) // 4 quizzes available
+                : 0;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+            
+            // Top Game
+            document.getElementById('topGame').textContent = 'Math Quest';
+            document.getElementById('topGamePlays').textContent = '5,000+ plays';
+            document.getElementById('mostBadgesGame').textContent = 'Math Quest';
+        }
+
+        function setupCharts() {
+            // Level Distribution Chart
+            const levelCtx = document.getElementById('levelChart')?.getContext('2d');
+            if (levelCtx) {
+                new Chart(levelCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Level 1', 'Level 2', 'Level 3', 'Level 4+'],
+                        datasets: [{
+                            label: 'Users',
+                            data: [65, 25, 7, 3],
+                            backgroundColor: [
+                                'rgba(196, 12, 12, 0.7)',
+                                'rgba(255, 101, 0, 0.7)',
+                                'rgba(204, 86, 30, 0.7)',
+                                'rgba(246, 206, 113, 0.7)'
+                            ],
+                            borderColor: [
+                                '#C40C0C',
+                                '#FF6500',
+                                '#CC561E',
+                                '#F6CE71'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Region Distribution Chart
+            const regionCtx = document.getElementById('regionChart')?.getContext('2d');
+            if (regionCtx) {
+                new Chart(regionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rural', 'Urban', 'Semi-Urban'],
+                        datasets: [{
+                            data: [70, 20, 10],
+                            backgroundColor: [
+                                'rgba(196, 12, 12, 0.7)',
+                                'rgba(255, 101, 0, 0.7)',
+                                'rgba(204, 86, 30, 0.7)'
+                            ],
+                            borderColor: [
+                                '#C40C0C',
+                                '#FF6500',
+                                '#CC561E'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ===== PHASE 1: ENHANCED USER SEARCH & FILTERS =====
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const minLevel = parseInt(document.getElementById('minLevel').value) || 0;
+            const maxLevel = parseInt(document.getElementById('maxLevel').value) || Infinity;
+            const minXP = parseInt(document.getElementById('minXP').value) || 0;
+            const maxXP = parseInt(document.getElementById('maxXP').value) || Infinity;
+            const regionFilter = document.getElementById('regionFilter').value;
+            
+            // Update active filters
+            activeFilters = {};
+            if (searchTerm) activeFilters.search = searchTerm;
+            if (minLevel > 0) activeFilters.minLevel = minLevel;
+            if (maxLevel < Infinity) activeFilters.maxLevel = maxLevel;
+            if (minXP > 0) activeFilters.minXP = minXP;
+            if (maxXP < Infinity) activeFilters.maxXP = maxXP;
+            if (regionFilter) activeFilters.region = regionFilter;
+            
+            // Update filter tags display
+            updateFilterTags();
+            
+            // Apply filters
+            filteredUsers = allUsers.filter(user => {
+                // Search filter
+                if (searchTerm && !(
+                    (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.username && user.username.toLowerCase().includes(searchTerm))
+                )) {
+                    return false;
+                }
+                
+                // Level filter
+                const userLevel = Math.floor((user.totalXP || 0) / 1000) + 1;
+                if (userLevel < minLevel || userLevel > maxLevel) {
+                    return false;
+                }
+                
+                // XP filter
+                const userXP = user.totalXP || 0;
+                if (userXP < minXP || userXP > maxXP) {
+                    return false;
+                }
+                
+                // Region filter
+                if (regionFilter && user.region !== regionFilter) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Apply sorting
+            sortUsers(currentSort.field, true);
+            
+            // Reset to first page
+            currentPage = 1;
+            renderUsersTable();
+        }
+
+        function updateFilterTags() {
+            const filterTags = document.getElementById('filterTags');
+            filterTags.innerHTML = '';
+            
+            Object.entries(activeFilters).forEach(([key, value]) => {
+                if (value) {
+                    const tag = document.createElement('div');
+                    tag.className = 'filter-tag';
+                    tag.innerHTML = `
+                        ${getFilterLabel(key)}: ${value}
+                        <button onclick="removeFilter('${key}')" class="hover:text-[#FF6500]">
+                            <i data-feather="x" class="w-3 h-3"></i>
+                        </button>
+                    `;
+                    filterTags.appendChild(tag);
+                }
+            });
+            
+            // Show/hide filter section
+            const hasFilters = Object.keys(activeFilters).length > 0;
+            document.getElementById('activeFilters').style.display = hasFilters ? 'block' : 'none';
+            
+            feather.replace();
+        }
+
+        function getFilterLabel(key) {
+            const labels = {
+                search: 'Search',
+                minLevel: 'Min Level',
+                maxLevel: 'Max Level',
+                minXP: 'Min XP',
+                maxXP: 'Max XP',
+                region: 'Region'
+            };
+            return labels[key] || key;
+        }
+
+        function removeFilter(key) {
+            delete activeFilters[key];
+            
+            // Reset the corresponding input
+            switch(key) {
+                case 'search':
+                    document.getElementById('userSearch').value = '';
+                    break;
+                case 'minLevel':
+                    document.getElementById('minLevel').value = '';
+                    break;
+                case 'maxLevel':
+                    document.getElementById('maxLevel').value = '';
+                    break;
+                case 'minXP':
+                    document.getElementById('minXP').value = '';
+                    break;
+                case 'maxXP':
+                    document.getElementById('maxXP').value = '';
+                    break;
+                case 'region':
+                    document.getElementById('regionFilter').value = '';
+                    break;
+            }
+            
+            filterUsers();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('userSearch').value = '';
+            document.getElementById('minLevel').value = '';
+            document.getElementById('maxLevel').value = '';
+            document.getElementById('minXP').value = '';
+            document.getElementById('maxXP').value = '';
+            document.getElementById('regionFilter').value = '';
+            
+            activeFilters = {};
+            filterUsers();
+        }
+
+        function sortUsers(field, preserveDirection = false) {
+            if (!preserveDirection) {
+                currentSort.direction = currentSort.field === field && currentSort.direction === 'asc' ? 'desc' : 'asc';
+                currentSort.field = field;
+            }
+            
+            filteredUsers.sort((a, b) => {
+                let aValue, bValue;
+                
+                switch(field) {
+                    case 'name':
+                        aValue = a.name || '';
+                        bValue = b.name || '';
+                        break;
+                    case 'email':
+                        aValue = a.email || '';
+                        bValue = b.email || '';
+                        break;
+                    case 'level':
+                        aValue = Math.floor((a.totalXP || 0) / 1000) + 1;
+                        bValue = Math.floor((b.totalXP || 0) / 1000) + 1;
+                        break;
+                    case 'region':
+                        aValue = a.region || '';
+                        bValue = b.region || '';
+                        break;
+                    case 'joined':
+                        aValue = new Date(a.joined || a.createdAt);
+                        bValue = new Date(b.joined || b.createdAt);
+                        break;
+                    default:
+                        aValue = a[field] || '';
+                        bValue = b[field] || '';
+                }
+                
+                if (currentSort.direction === 'asc') {
+                    return aValue > bValue ? 1 : -1;
+                } else {
+                    return aValue < bValue ? 1 : -1;
+                }
+            });
+            
+            renderUsersTable();
+        }
+
+        function renderUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            const noUsersMessage = document.getElementById('noUsersMessage');
+            const showingStart = document.getElementById('showingStart');
+            const showingEnd = document.getElementById('showingEnd');
+            const showingCount = document.getElementById('showingCount');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = Math.min(startIndex + usersPerPage, filteredUsers.length);
+            const pageUsers = filteredUsers.slice(startIndex, endIndex);
+            
+            // Update pagination info
+            showingStart.textContent = filteredUsers.length > 0 ? startIndex + 1 : 0;
+            showingEnd.textContent = endIndex;
+            showingCount.textContent = filteredUsers.length;
+            pageInfo.textContent = `Page ${currentPage} of ${Math.ceil(filteredUsers.length / usersPerPage)}`;
+            
+            // Update button states
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage * usersPerPage >= filteredUsers.length;
+            
+            if (filteredUsers.length === 0) {
                 tableBody.innerHTML = '';
                 noUsersMessage.classList.remove('hidden');
                 return;
             }
             
             noUsersMessage.classList.add('hidden');
-            tableBody.innerHTML = users.map(user => `
-                <tr class="border-b border-slate-700 hover:bg-slate-800/30">
-                    <td class="py-3 px-4">${user.id || 'N/A'}</td>
-                    <td class="py-3 px-4 font-medium">${user.username || 'N/A'}</td>
-                    <td class="py-3 px-4">${user.email || 'N/A'}</td>
-                    <td class="py-3 px-4">${user.name || 'N/A'}</td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded-full text-xs ${
-                            user.region === 'rural' ? 'bg-emerald-900/50 text-emerald-300' :
-                            user.region === 'urban' ? 'bg-blue-900/50 text-blue-300' :
-                            'bg-slate-700 text-slate-300'
-                        }">
-                            ${user.region || 'Unknown'}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-sm text-slate-400">
-                        ${user.joined ? new Date(user.joined).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="flex space-x-2">
-                            <button onclick="viewUser(${user.id})" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm">
-                                View
-                            </button>
-                            <button onclick="deleteUser(${user.id})" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm">
-                                Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            
+            tableBody.innerHTML = pageUsers.map(user => {
+                const userLevel = Math.floor((user.totalXP || 0) / 1000) + 1;
+                const isSelected = selectedUserIds.has(user.id);
+                
+                return `
+                    <tr class="user-row border-b border-[#FF6500]/10">
+                        <td class="py-3 px-4">
+                            <input type="checkbox" 
+                                   ${isSelected ? 'checked' : ''}
+                                   onchange="toggleUserSelection(${user.id}, this.checked)"
+                                   class="user-checkbox accent-[#FF6500]">
+                        </td>
+                        <td class="py-3 px-4 font-medium">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6500] to-[#E55A00] flex items-center justify-center text-sm text-white">
+                                    ${(user.name || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div>${user.name || 'Unknown'}</div>
+                                    <div class="text-xs text-slate-400">@${user.username || 'No username'}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${user.email || 'N/A'}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-1 bg-[#FF6500]/20 text-[#FF6500] rounded text-xs border border-[#FF6500]/30">
+                                    Lvl ${userLevel}
+                                </span>
+                                <span class="text-slate-400 text-sm">
+                                    ${(user.totalXP || 0).toLocaleString()} XP
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs border ${
+                                user.region === 'rural' ? 'bg-[#C40C0C]/20 text-[#C40C0C] border-[#C40C0C]/30' :
+                                user.region === 'urban' ? 'bg-[#FF6500]/20 text-[#FF6500] border-[#FF6500]/30' :
+                                'bg-[#CC561E]/20 text-[#CC561E] border-[#CC561E]/30'
+                            }">
+                                ${user.region || 'Unknown'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-slate-400">
+                            ${user.joined ? new Date(user.joined).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex space-x-2">
+                                <button onclick="viewUserDetails(${user.id})" 
+                                        class="px-3 py-1 bg-[#FF6500] hover:bg-[#E55A00] rounded text-sm">
+                                    View
+                                </button>
+                                <button onclick="editUser(${user.id})" 
+                                        class="px-3 py-1 bg-[#CC561E] hover:bg-[#B34915] rounded text-sm">
+                                    Edit
+                                </button>
+                                <button onclick="deleteUser(${user.id})" 
+                                        class="px-3 py-1 bg-[#C40C0C] hover:bg-[#A00808] rounded text-sm">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
             
             feather.replace();
         }
-        
-        function viewUser(userId) {
-            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
-            const user = users.find(u => u.id === userId);
+
+        function toggleUserSelection(userId, isSelected) {
+            if (isSelected) {
+                selectedUserIds.add(userId);
+            } else {
+                selectedUserIds.delete(userId);
+            }
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAllUsers').checked;
+            const checkboxes = document.querySelectorAll('.user-checkbox');
             
+            if (selectAll) {
+                const startIndex = (currentPage - 1) * usersPerPage;
+                const endIndex = Math.min(startIndex + usersPerPage, filteredUsers.length);
+                const pageUsers = filteredUsers.slice(startIndex, endIndex);
+                
+                pageUsers.forEach(user => selectedUserIds.add(user.id));
+                checkboxes.forEach(cb => cb.checked = true);
+            } else {
+                selectedUserIds.clear();
+                checkboxes.forEach(cb => cb.checked = false);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderUsersTable();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage * usersPerPage < filteredUsers.length) {
+                currentPage++;
+                renderUsersTable();
+            }
+        }
+
+        // ===== PHASE 1: BULK USER OPERATIONS =====
+        function showBulkActions() {
+            if (selectedUserIds.size === 0) {
+                alert('Please select users first by checking the checkboxes.');
+                return;
+            }
+            
+            document.getElementById('bulkActionsModal').style.display = 'flex';
+            updateBulkActionDetails();
+        }
+
+        function updateBulkActionDetails() {
+            const actionType = document.getElementById('bulkActionType').value;
+            const detailsDiv = document.getElementById('bulkActionDetails');
+            
+            let html = '';
+            switch(actionType) {
+                case 'email':
+                    html = `
+                        <div>
+                            <label class="block text-slate-300 mb-2">Email Subject</label>
+                            <input type="text" id="bulkEmailSubject" 
+                                   class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 mb-2">Email Message</label>
+                            <textarea id="bulkEmailMessage" rows="4"
+                                      class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white"></textarea>
+                        </div>
+                    `;
+                    break;
+                case 'achievement':
+                    html = `
+                        <div>
+                            <label class="block text-slate-300 mb-2">Select Achievement</label>
+                            <select id="bulkAchievement" class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                                <option value="first-game">First Steps</option>
+                                <option value="math-master">Math Wizard</option>
+                                <option value="agri-expert">Farm Master</option>
+                                <option value="streak-master">Daily Champion</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                case 'xp':
+                    html = `
+                        <div>
+                            <label class="block text-slate-300 mb-2">XP Amount</label>
+                            <input type="number" id="bulkXPAmount" value="100"
+                                   class="w-full px-4 py-2 bg-[#16213e] border border-[#FF6500]/30 rounded-lg text-white">
+                        </div>
+                    `;
+                    break;
+                case 'delete':
+                    html = `
+                        <div class="bg-[#C40C0C]/20 border border-[#C40C0C]/30 p-4 rounded-lg">
+                            <div class="flex items-center gap-3 text-[#C40C0C]">
+                                <i data-feather="alert-triangle" class="w-5 h-5"></i>
+                                <div class="font-semibold">Warning: This action cannot be undone!</div>
+                            </div>
+                            <p class="text-sm text-slate-300 mt-2">
+                                You are about to delete ${selectedUserIds.size} user(s). This will permanently remove all their data.
+                            </p>
+                            <div class="mt-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="confirmDelete" class="mr-2 accent-[#C40C0C]">
+                                    <span class="text-sm">I understand and want to proceed</span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            detailsDiv.innerHTML = html;
+            feather.replace();
+        }
+
+        function executeBulkAction() {
+            const actionType = document.getElementById('bulkActionType').value;
+            
+            switch(actionType) {
+                case 'email':
+                    bulkSendEmailAction();
+                    break;
+                case 'achievement':
+                    bulkGrantAchievementAction();
+                    break;
+                case 'xp':
+                    bulkAddXPAction();
+                    break;
+                case 'delete':
+                    bulkDeleteUsers();
+                    break;
+                default:
+                    alert('Please select an action first.');
+            }
+        }
+
+        function bulkSendEmailAction() {
+            const subject = document.getElementById('bulkEmailSubject').value;
+            const message = document.getElementById('bulkEmailMessage').value;
+            
+            if (!subject || !message) {
+                alert('Please fill in both subject and message.');
+                return;
+            }
+            
+            // In a real app, this would send emails via API
+            alert(`Email would be sent to ${selectedUserIds.size} user(s):\nSubject: ${subject}`);
+            closeModal('bulkActionsModal');
+        }
+
+        function bulkGrantAchievementAction() {
+            const achievementId = document.getElementById('bulkAchievement').value;
+            
+            // Update users in localStorage
+            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
+            users.forEach(user => {
+                if (selectedUserIds.has(user.id)) {
+                    if (!user.achievements) user.achievements = {};
+                    user.achievements[achievementId] = {
+                        earned: true,
+                        date: new Date().toISOString(),
+                        xpEarned: 50 // Default XP
+                    };
+                }
+            });
+            
+            localStorage.setItem('gameEdUsers', JSON.stringify(users));
+            loadAllData();
+            
+            alert(`Granted achievement to ${selectedUserIds.size} user(s)`);
+            closeModal('bulkActionsModal');
+        }
+
+        function bulkAddXPAction() {
+            const xpAmount = parseInt(document.getElementById('bulkXPAmount').value);
+            
+            if (isNaN(xpAmount) || xpAmount <= 0) {
+                alert('Please enter a valid XP amount.');
+                return;
+            }
+            
+            // Update users in localStorage
+            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
+            users.forEach(user => {
+                if (selectedUserIds.has(user.id)) {
+                    user.totalXP = (user.totalXP || 0) + xpAmount;
+                    user.xp = (user.xp || 0) + xpAmount;
+                }
+            });
+            
+            localStorage.setItem('gameEdUsers', JSON.stringify(users));
+            loadAllData();
+            
+            alert(`Added ${xpAmount} XP to ${selectedUserIds.size} user(s)`);
+            closeModal('bulkActionsModal');
+        }
+
+        function bulkDeleteUsers() {
+            if (!document.getElementById('confirmDelete')?.checked) {
+                alert('Please confirm the deletion by checking the box.');
+                return;
+            }
+            
+            if (!confirm(`Permanently delete ${selectedUserIds.size} user(s)? This cannot be undone!`)) {
+                return;
+            }
+            
+            // Remove users from localStorage
+            let users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
+            users = users.filter(user => !selectedUserIds.has(user.id));
+            localStorage.setItem('gameEdUsers', JSON.stringify(users));
+            
+            // Clear selection
+            selectedUserIds.clear();
+            
+            loadAllData();
+            alert(`Deleted ${selectedUserIds.size} user(s) successfully`);
+            closeModal('bulkActionsModal');
+        }
+
+        // ===== PHASE 1: BASIC GAME/CONTENT MANAGEMENT =====
+        function loadGamesList() {
+            const gamesList = document.getElementById('gamesList');
+            
+            // Mock games data - in real app, load from localStorage
+            const games = [
+                { name: 'Math Quest', category: 'math', plays: 5000, active: true },
+                { name: 'Agri-Sim', category: 'agriculture', plays: 3200, active: true },
+                { name: 'Science Lab VR', category: 'science', plays: 4100, active: true },
+                { name: 'Word Master', category: 'language', plays: 2800, active: true },
+                { name: 'History Quest', category: 'general', plays: 4300, active: true },
+                { name: 'Eco Warrior', category: 'general', plays: 3500, active: true }
+            ];
+            
+            gamesList.innerHTML = games.map(game => `
+                <div class="flex justify-between items-center p-3 bg-[#16213e] rounded-lg border border-[#FF6500]/10 hover:border-[#FF6500]/30 transition-colors">
+                    <div>
+                        <div class="font-semibold secondary-text">${game.name}</div>
+                        <div class="text-sm text-slate-400">
+                            ${game.category.toUpperCase()} • ${game.plays.toLocaleString()} plays
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editGame('${game.name}')" class="px-3 py-1 btn-secondary rounded text-sm">
+                            Edit
+                        </button>
+                        <button onclick="toggleGameStatus('${game.name}')" class="px-3 py-1 ${game.active ? 'bg-[#CC561E] hover:bg-[#B34915]' : 'bg-[#FF6500] hover:bg-[#E55A00]'} rounded text-sm">
+                            ${game.active ? 'Disable' : 'Enable'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update content counts
+            document.getElementById('totalLessons').textContent = '12';
+            document.getElementById('totalQuizzes').textContent = '4';
+        }
+
+        function showAddGameModal() {
+            document.getElementById('addGameModal').style.display = 'flex';
+        }
+
+        function createNewGame() {
+            const name = document.getElementById('gameName').value;
+            const description = document.getElementById('gameDescription').value;
+            const category = document.getElementById('gameCategory').value;
+            const xp = document.getElementById('gameXP').value;
+            
+            if (!name || !description) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // In real app, save to localStorage/API
+            alert(`Game "${name}" would be added to the system.`);
+            closeModal('addGameModal');
+            
+            // Clear form
+            document.getElementById('gameName').value = '';
+            document.getElementById('gameDescription').value = '';
+            document.getElementById('gameXP').value = '50';
+            
+            // Reload games list
+            loadGamesList();
+        }
+
+        function editGame(gameName) {
+            alert(`Edit game: ${gameName}\n\nIn a full implementation, this would open an edit form.`);
+        }
+
+        function toggleGameStatus(gameName) {
+            if (confirm(`Toggle active status for "${gameName}"?`)) {
+                alert(`Game status toggled for "${gameName}"`);
+                loadGamesList();
+            }
+        }
+
+        function editContent(subject) {
+            alert(`Edit ${subject} content\n\nThis would open a content management interface.`);
+        }
+
+        // ===== PHASE 1: SIMPLE REPORTING =====
+        function generateUserReport() {
+            const reportData = {
+                totalUsers: allUsers.length,
+                newUsersToday: allUsers.filter(u => {
+                    const joinDate = new Date(u.joined).toDateString();
+                    return joinDate === new Date().toDateString();
+                }).length,
+                avgXP: Math.round(allUsers.reduce((sum, u) => sum + (u.totalXP || 0), 0) / allUsers.length),
+                regionalDistribution: allUsers.reduce((acc, u) => {
+                    acc[u.region] = (acc[u.region] || 0) + 1;
+                    return acc;
+                }, {})
+            };
+            
+            downloadJSON(reportData, `user-report-${new Date().toISOString().split('T')[0]}.json`);
+            alert('User report generated and downloaded as JSON.');
+        }
+
+        function generateProgressReport() {
+            const progressData = {
+                averageLevel: Math.round(allUsers.reduce((sum, u) => {
+                    return sum + (Math.floor((u.totalXP || 0) / 1000) + 1);
+                }, 0) / allUsers.length),
+                topAchievements: {},
+                completionRates: {
+                    quizzes: Math.round((allUsers.reduce((sum, u) => sum + (u.quizzes ? Object.keys(u.quizzes).length : 0), 0) / (allUsers.length * 4)) * 100),
+                    lessons: '85%' // Mock data
+                }
+            };
+            
+            downloadJSON(progressData, `progress-report-${new Date().toISOString().split('T')[0]}.json`);
+            alert('Progress report generated and downloaded as JSON.');
+        }
+
+        function generateGameReport() {
+            const gameData = {
+                totalPlays: 23100, // Mock data
+                popularGames: [
+                    { name: 'Math Quest', plays: 5000, completionRate: '85%' },
+                    { name: 'Agri-Sim', plays: 3200, completionRate: '92%' },
+                    { name: 'Science Lab VR', plays: 4100, completionRate: '78%' }
+                ],
+                averageSessionTime: '12 minutes',
+                peakHours: ['2 PM - 4 PM', '6 PM - 8 PM']
+            };
+            
+            downloadJSON(gameData, `game-report-${new Date().toISOString().split('T')[0]}.json`);
+            alert('Game analytics report generated and downloaded as JSON.');
+        }
+
+        function downloadJSON(data, filename) {
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+        }
+
+        // ===== PHASE 1: SYSTEM STATUS =====
+        function updateSystemStatus() {
+            // Calculate storage usage
+            let totalStorage = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                totalStorage += key.length + value.length;
+            }
+            
+            const storageKB = Math.round(totalStorage / 1024);
+            const maxStorage = 5120; // 5MB in KB
+            const storagePercent = Math.round((storageKB / maxStorage) * 100);
+            
+            document.getElementById('storageUsage').textContent = `${storageKB} KB used`;
+            document.getElementById('storagePercent').textContent = `${storagePercent}%`;
+            document.getElementById('storageBar').style.width = `${storagePercent}%`;
+            document.getElementById('storageDetails').textContent = `${storageKB} KB / ${maxStorage} KB`;
+            
+            // Mock active sessions
+            document.getElementById('activeSessions').textContent = Math.floor(Math.random() * 10) + 1;
+            
+            // Mock last backup
+            const lastBackup = localStorage.getItem('lastBackup');
+            document.getElementById('lastBackup').textContent = lastBackup 
+                ? new Date(lastBackup).toLocaleString() 
+                : 'Never';
+            
+            // Mock error count
+            document.getElementById('errorCount').textContent = '0';
+            document.getElementById('lastError').textContent = 'None';
+        }
+
+        function runBackup() {
+            // Create backup
+            const backupData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    backupData[key] = JSON.parse(localStorage.getItem(key));
+                } catch {
+                    backupData[key] = localStorage.getItem(key);
+                }
+            }
+            
+            // Save backup timestamp
+            localStorage.setItem('lastBackup', new Date().toISOString());
+            
+            // Download backup
+            downloadJSON(backupData, `gameed-backup-${new Date().toISOString().split('T')[0]}.json`);
+            
+            updateSystemStatus();
+            alert('Backup completed and downloaded!');
+        }
+
+        function viewErrorLogs() {
+            alert('Error logs would be displayed here.\n\nIn a full implementation, this would show system errors and warnings.');
+        }
+
+        // ===== EXISTING FUNCTIONS (Updated) =====
+        function viewUserDetails(userId) {
+            const user = allUsers.find(u => u.id === userId);
             if (!user) {
                 alert('User not found!');
                 return;
             }
             
-            const userDetails = JSON.stringify(user, null, 2);
-            alert(`User Details:\n\n${userDetails}`);
+            // Show detailed modal
+            const modal = document.getElementById('userDetailsModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            const userLevel = Math.floor((user.totalXP || 0) / 1000) + 1;
+            const achievements = user.achievements ? Object.keys(user.achievements).length : 0;
+            
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold secondary-text">User Details</h3>
+                    <button onclick="closeModal('userDetailsModal')" class="text-slate-400 hover:text-[#FF6500]">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- User Header -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF6500] to-[#E55A00] flex items-center justify-center text-2xl font-bold text-white">
+                            ${(user.name || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold">${user.name || 'Unknown'}</h4>
+                            <p class="text-slate-400">@${user.username || 'No username'}</p>
+                            <p class="text-slate-400">${user.email || 'No email'}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-[#16213e] rounded-lg border border-[#FF6500]/10">
+                            <div class="text-2xl font-bold secondary-text">${userLevel}</div>
+                            <div class="text-sm text-slate-400">Level</div>
+                        </div>
+                        <div class="p-4 bg-[#16213e] rounded-lg border border-[#FF6500]/10">
+                            <div class="text-2xl font-bold highlight-text">${(user.totalXP || 0).toLocaleString()}</div>
+                            <div class="text-sm text-slate-400">Total XP</div>
+                        </div>
+                        <div class="p-4 bg-[#16213e] rounded-lg border border-[#FF6500]/10">
+                            <div class="text-2xl font-bold accent-text">${user.gamesPlayed || 0}</div>
+                            <div class="text-sm text-slate-400">Games Played</div>
+                        </div>
+                        <div class="p-4 bg-[#16213e] rounded-lg border border-[#FF6500]/10">
+                            <div class="text-2xl font-bold primary-text">${achievements}</div>
+                            <div class="text-sm text-slate-400">Achievements</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div>
+                        <h5 class="font-semibold mb-2 secondary-text">Additional Information</h5>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-slate-400">Region:</span>
+                                <span class="ml-2">${user.region || 'Unknown'}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400">Age Group:</span>
+                                <span class="ml-2">${user.age || 'Unknown'}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400">Joined:</span>
+                                <span class="ml-2">${user.joined ? new Date(user.joined).toLocaleDateString() : 'Unknown'}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400">Last Login:</span>
+                                <span class="ml-2">${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex gap-2 pt-4 border-t border-[#FF6500]/10">
+                        <button onclick="loginAsUser(${user.id})" class="flex-1 py-2 btn-secondary rounded-lg">
+                            Login as User
+                        </button>
+                        <button onclick="resetUserPassword(${user.id})" class="flex-1 py-2 btn-accent rounded-lg">
+                            Reset Password
+                        </button>
+                        <button onclick="deleteUser(${user.id})" class="flex-1 py-2 btn-primary rounded-lg">
+                            Delete User
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+            feather.replace();
         }
-        
+
         function deleteUser(userId) {
             if (!confirm('Are you sure you want to delete this user?')) return;
             
@@ -192,53 +1829,37 @@
             const updatedUsers = users.filter(u => u.id !== userId);
             
             localStorage.setItem('gameEdUsers', JSON.stringify(updatedUsers));
-            loadUsers();
+            loadAllData();
             
             alert('User deleted successfully!');
         }
-        
-        function exportUsers() {
-            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
-            const dataStr = JSON.stringify(users, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `gameed_users_${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            alert(`Exported ${users.length} users to JSON file!`);
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'flex';
         }
-        
-        function clearDemoData() {
-            if (!confirm('Clear all demo/test accounts? This cannot be undone!')) return;
+
+        function createNewUser() {
+            const firstName = document.getElementById('newFirstName').value;
+            const lastName = document.getElementById('newLastName').value;
+            const email = document.getElementById('newEmail').value;
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const region = document.getElementById('newRegion').value;
+            const role = document.getElementById('newRole').value;
             
-            const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
-            const demoUsers = users.filter(user => 
-                user.email.includes('demo') || 
-                user.email.includes('test') ||
-                user.username.includes('test') ||
-                user.email === 'student@gameedrural.com' ||
-                user.email === 'champion@gameedrural.com'
-            );
+            if (!firstName || !email || !username || !password) {
+                alert('Please fill in all required fields.');
+                return;
+            }
             
-            const remainingUsers = users.filter(user => !demoUsers.includes(user));
-            localStorage.setItem('gameEdUsers', JSON.stringify(remainingUsers));
-            loadUsers();
-            
-            alert(`Removed ${demoUsers.length} demo accounts!`);
-        }
-        
-        function addTestUser() {
-            const testUser = {
+            const newUser = {
                 id: Date.now(),
-                name: "Test User",
-                email: `test${Date.now()}@gameedrural.com`,
-                username: `test_user_${Date.now().toString().slice(-4)}`,
-                region: "rural",
-                age: "13-16",
+                name: `${firstName} ${lastName}`,
+                email,
+                username,
+                password,
+                region,
+                role,
                 xp: 100,
                 totalXP: 100,
                 level: 1,
@@ -249,14 +1870,42 @@
             };
             
             const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
-            users.push(testUser);
+            users.push(newUser);
             localStorage.setItem('gameEdUsers', JSON.stringify(users));
-            loadUsers();
             
-            alert(`Test user created: ${testUser.username}`);
+            loadAllData();
+            closeModal('addUserModal');
+            alert(`User "${username}" created successfully!`);
         }
-        
-        function viewLocalStorage() {
+
+        function loginAsUser(userId) {
+            if (!confirm('Login as this user? You will be redirected to their dashboard.')) return;
+            
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                // Remove password for security
+                const { password, ...safeUser } = user;
+                localStorage.setItem('gameEdUser', JSON.stringify(safeUser));
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        function resetUserPassword(userId) {
+            const newPassword = prompt('Enter new password for this user:');
+            if (newPassword && newPassword.length >= 6) {
+                const users = JSON.parse(localStorage.getItem('gameEdUsers')) || [];
+                const userIndex = users.findIndex(u => u.id === userId);
+                if (userIndex !== -1) {
+                    users[userIndex].password = newPassword;
+                    localStorage.setItem('gameEdUsers', JSON.stringify(users));
+                    alert('Password reset successfully!');
+                }
+            } else {
+                alert('Password must be at least 6 characters.');
+            }
+        }
+
+        function exportAllData() {
             const allData = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -267,21 +1916,16 @@
                 }
             }
             
-            const dataStr = JSON.stringify(allData, null, 2);
-            console.log('All Local Storage:', allData);
-            alert('All local storage data logged to console (F12 → Console)');
+            downloadJSON(allData, `gameed-full-export-${new Date().toISOString().split('T')[0]}.json`);
+            alert('All data exported successfully!');
         }
-        
-        function resetAllData() {
-            if (!confirm('⚠️ DANGER: This will delete ALL user data! Continue?')) return;
-            
-            localStorage.removeItem('gameEdUsers');
-            localStorage.removeItem('gameEdUser');
-            sessionStorage.removeItem('gameEdUser');
-            
-            alert('All data has been reset!');
-            loadUsers();
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
+
+        // Update bulk action details when selection changes
+        document.getElementById('bulkActionType').addEventListener('change', updateBulkActionDetails);
     </script>
 </body>
 </html>
