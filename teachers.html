@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - GameEd Rural</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --color-primary: #15173D;
+            --color-secondary: #982598;
+            --color-accent: #E491C9;
+            --color-light: #F1E9E9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #15173D 50%, #0a0a1a 100%);
+            min-height: 100vh;
+            color: var(--color-light);
+            padding-top: 70px;
+        }
+
+        .glass-card {
+            background: rgba(21, 23, 61, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(152, 37, 152, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .primary-bg {
+            background: linear-gradient(135deg, var(--color-primary), #0c0d26);
+        }
+
+        .secondary-bg {
+            background: linear-gradient(135deg, var(--color-secondary), #7a1e7a);
+        }
+
+        .accent-bg {
+            background: linear-gradient(135deg, var(--color-accent), #d074b5);
+        }
+
+        .light-bg {
+            background: linear-gradient(135deg, var(--color-light), #e0d8d8);
+            color: var(--color-primary);
+        }
+
+        .primary-text {
+            color: var(--color-primary);
+        }
+
+        .secondary-text {
+            color: var(--color-secondary);
+        }
+
+        .accent-text {
+            color: var(--color-accent);
+        }
+
+        .light-text {
+            color: var(--color-light);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-secondary), #7a1e7a);
+            border: 1px solid rgba(152, 37, 152, 0.3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #7a1e7a, #5c155c);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(152, 37, 152, 0.3);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--color-accent), #d074b5);
+            border: 1px solid rgba(228, 145, 201, 0.3);
+            color: var(--color-primary);
+        }
+
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #d074b5, #b862a1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(228, 145, 201, 0.3);
+        }
+
+        .btn-light {
+            background: linear-gradient(135deg, var(--color-light), #e0d8d8);
+            border: 1px solid rgba(241, 233, 233, 0.3);
+            color: var(--color-primary);
+        }
+
+        .btn-light:hover {
+            background: linear-gradient(135deg, #e0d8d8, #cfc7c7);
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1c45, #15173D);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            border: 2px solid rgba(152, 37, 152, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(241, 233, 233, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .secondary-progress {
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-accent));
+        }
+
+        .accent-progress {
+            background: linear-gradient(90deg, var(--color-accent), var(--color-light));
+        }
+
+        .avatar-purple {
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+        }
+
+        .avatar-pink {
+            background: linear-gradient(135deg, var(--color-accent), #ffb6e1);
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .gradient-border {
+            border: 2px solid transparent;
+            background: linear-gradient(var(--color-primary), var(--color-primary)) padding-box,
+                linear-gradient(135deg, var(--color-secondary), var(--color-accent)) border-box;
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(152, 37, 152, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <custom-header></custom-header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold light-text mb-2">👩‍🏫 Teacher Dashboard</h1>
+                <p class="text-accent">Welcome back, Mrs. Sharma! Manage your classes and track student progress</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-accent">
+                    <i data-feather="calendar" class="w-4 h-4 inline-block mr-1"></i>
+                    <span id="currentDate">Loading...</span>
+                </div>
+                <button onclick="createNewAssignment()" class="px-4 py-2 btn-primary rounded-lg font-medium">
+                    <i data-feather="plus" class="w-4 h-4 inline-block mr-2"></i>
+                    New Assignment
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card p-4 rounded-xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-accent">Active Classes</p>
+                        <h3 class="text-2xl font-bold light-text" id="activeClasses">3</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full avatar-purple flex items-center justify-center">
+                        <i data-feather="book-open" class="w-5 h-5 text-white"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-accent mt-2">75 total students</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-accent">Pending Grading</p>
+                        <h3 class="text-2xl font-bold light-text" id="pendingGrading">24</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full secondary-bg flex items-center justify-center">
+                        <i data-feather="clipboard" class="w-5 h-5 text-white"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-accent mt-2">Due this week</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-accent">Avg. Class Score</p>
+                        <h3 class="text-2xl font-bold light-text" id="avgScore">78%</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full accent-bg flex items-center justify-center">
+                        <i data-feather="trending-up" class="w-5 h-5 text-primary"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-accent mt-2">+5% from last month</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-accent">Parent Messages</p>
+                        <h3 class="text-2xl font-bold light-text" id="parentMessages">12</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-full light-bg flex items-center justify-center">
+                        <i data-feather="message-square" class="w-5 h-5 text-primary"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-accent mt-2">3 require response</p>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Classes & Students -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Phase 2.1: Virtual Classrooms -->
+                <div class="glass-card rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold light-text">🏫 My Classes</h2>
+                        <button onclick="createNewClass()" class="px-3 py-1 btn-primary rounded text-sm">
+                            <i data-feather="plus" class="w-4 h-4 inline-block mr-1"></i>
+                            New Class
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="classesList">
+                        <!-- Classes will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Phase 2.2: Differentiation Tools -->
+                <div class="glass-card rounded-xl p-6">
+                    <h2 class="text-xl font-bold light-text mb-6">🎯 Differentiation Tools</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <button onclick="createLeveledAssignment()"
+                            class="p-4 glass-card hover-glow rounded-lg text-center transition-all">
+                            <div
+                                class="w-12 h-12 rounded-full avatar-purple flex items-center justify-center mx-auto mb-3">
+                                <i data-feather="layers" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="font-semibold light-text mb-1">Leveled Assignments</div>
+                            <div class="text-xs text-accent">Create Basic/Intermediate/Advanced</div>
+                        </button>
+
+                        <button onclick="showGroupingTool()"
+                            class="p-4 glass-card hover-glow rounded-lg text-center transition-all">
+                            <div
+                                class="w-12 h-12 rounded-full secondary-bg flex items-center justify-center mx-auto mb-3">
+                                <i data-feather="users" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="font-semibold light-text mb-1">Smart Grouping</div>
+                            <div class="text-xs text-accent">Auto-group by skill level</div>
+                        </button>
+
+                        <button onclick="showScaffoldingTool()"
+                            class="p-4 glass-card hover-glow rounded-lg text-center transition-all">
+                            <div class="w-12 h-12 rounded-full accent-bg flex items-center justify-center mx-auto mb-3">
+                                <i data-feather="life-buoy" class="w-6 h-6 text-primary"></i>
+                            </div>
+                            <div class="font-semibold light-text mb-1">Scaffolding Tools</div>
+                            <div class="text-xs text-accent">Support for struggling students</div>
+                        </button>
+                    </div>
+
+                    <div class="p-4 glass-card rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="font-semibold light-text">Differentiation Suggestions</div>
+                            <span class="text-xs px-2 py-1 bg-secondary/20 text-accent rounded">AI-Powered</span>
+                        </div>
+                        <div id="differentiationSuggestions">
+                            <!-- Suggestions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2.3: Formative Assessment Creator -->
+                <div class="glass-card rounded-xl p-6">
+                    <h2 class="text-xl font-bold light-text mb-6">📝 Quick Assessments</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                        <button onclick="createQuickQuiz()" class="p-3 glass-card hover-glow rounded-lg text-center">
+                            <i data-feather="help-circle" class="w-5 h-5 secondary-text mx-auto mb-2"></i>
+                            <div class="text-sm light-text">Quick Quiz</div>
+                        </button>
+
+                        <button onclick="createExitTicket()" class="p-3 glass-card hover-glow rounded-lg text-center">
+                            <i data-feather="log-out" class="w-5 h-5 accent-text mx-auto mb-2"></i>
+                            <div class="text-sm light-text">Exit Ticket</div>
+                        </button>
+
+                        <button onclick="createPoll()" class="p-3 glass-card hover-glow rounded-lg text-center">
+                            <i data-feather="bar-chart-2" class="w-5 h-5 secondary-text mx-auto mb-2"></i>
+                            <div class="text-sm light-text">Class Poll</div>
+                        </button>
+
+                        <button onclick="createSelfAssessment()"
+                            class="p-3 glass-card hover-glow rounded-lg text-center">
+                            <i data-feather="check-square" class="w-5 h-5 accent-text mx-auto mb-2"></i>
+                            <div class="text-sm light-text">Self-Assessment</div>
+                        </button>
+                    </div>
+
+                    <div class="p-4 glass-card rounded-lg">
+                        <h4 class="font-semibold light-text mb-3">Recent Assessments</h4>
+                        <div id="recentAssessments">
+                            <!-- Assessments will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Quick Actions & Analytics -->
+            <div class="space-y-8">
+                <!-- Phase 2.4: Attendance & Behavior Tracker -->
+                <div class="glass-card rounded-xl p-6">
+                    <h2 class="text-xl font-bold light-text mb-6">📊 Today's Attendance</h2>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 glass-card rounded-lg">
+                            <div>
+                                <div class="font-semibold light-text">Present</div>
+                                <div class="text-2xl font-bold secondary-text" id="presentCount">68</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <i data-feather="check" class="w-5 h-5 text-green-400"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 glass-card rounded-lg">
+                            <div>
+                                <div class="font-semibold light-text">Absent</div>
+                                <div class="text-2xl font-bold accent-text" id="absentCount">4</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                                <i data-feather="x" class="w-5 h-5 text-red-400"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 glass-card rounded-lg">
+                            <div>
+                                <div class="font-semibold light-text">Late</div>
+                                <div class="text-2xl font-bold light-text" id="lateCount">3</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                                <i data-feather="clock" class="w-5 h-5 text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="takeAttendance()" class="w-full mt-4 py-2 btn-accent rounded-lg font-medium">
+                        <i data-feather="edit" class="w-4 h-4 inline-block mr-2"></i>
+                        Take Attendance
+                    </button>
+                </div>
+
+                <!-- Phase 2.5: Report Card/Comment Generator -->
+                <div class="glass-card rounded-xl p-6">
+                    <h2 class="text-xl font-bold light-text mb-6">💬 Comment Generator</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-accent mb-2">Student</label>
+                            <select id="studentSelect"
+                                class="w-full px-3 py-2 glass-card border border-secondary/30 rounded-lg">
+                                <option value="">Select a student</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-accent mb-2">Comment Type</label>
+                            <select id="commentType"
+                                class="w-full px-3 py-2 glass-card border border-secondary/30 rounded-lg">
+                                <option value="strength">Strength-based</option>
+                                <option value="growth">Growth-focused</option>
+                                <option value="behavior">Behavior</option>
+                                <option value="improvement">Areas for Improvement</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-accent mb-2">Tone</label>
+                            <select id="commentTone"
+                                class="w-full px-3 py-2 glass-card border border-secondary/30 rounded-lg">
+                                <option value="formal">Formal</option>
+                                <option value="encouraging">Encouraging</option>
+                                <option value="detailed">Detailed</option>
+                                <option value="brief">Brief</option>
+                            </select>
+                        </div>
+
+                        <button onclick="generateComment()" class="w-full py-2 btn-primary rounded-lg font-medium">
+                            Generate Comment
+                        </button>
+
+                        <div class="p-3 glass-card rounded-lg hidden" id="generatedComment">
+                            <div class="text-sm light-text" id="commentText"></div>
+                            <button onclick="copyComment()" class="mt-2 text-xs px-2 py-1 btn-light rounded">
+                                Copy to Clipboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2.6: Resource Sharing -->
+                <div class="glass-card rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold light-text">📚 Shared Resources</h2>
+                        <button onclick="shareResource()" class="px-3 py-1 btn-primary rounded text-sm">
+                            Share
+                        </button>
+                    </div>
+
+                    <div class="space-y-3" id="sharedResources">
+                        <!-- Resources will be loaded here -->
+                    </div>
+
+                    <div class="mt-4 p-3 glass-card rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full avatar-pink flex items-center justify-center">
+                                <i data-feather="user" class="w-4 h-4 text-white"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold light-text">Mr. Singh</div>
+                                <div class="text-xs text-accent">Shared 2 resources today</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Analytics -->
+                <div class="glass-card rounded-xl p-6">
+                    <h2 class="text-xl font-bold light-text mb-6">📈 Class Performance</h2>
+
+                    <div class="h-48">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-3">
+                        <div class="p-3 glass-card rounded-lg text-center">
+                            <div class="text-sm text-accent">Top Subject</div>
+                            <div class="font-bold light-text">Mathematics</div>
+                            <div class="text-xs text-accent">92% mastery</div>
+                        </div>
+
+                        <div class="p-3 glass-card rounded-lg text-center">
+                            <div class="text-sm text-accent">Needs Support</div>
+                            <div class="font-bold light-text">Science</div>
+                            <div class="text-xs text-accent">65% mastery</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mt-8 glass-card rounded-xl p-6">
+            <h2 class="text-xl font-bold light-text mb-6">🔄 Recent Activity</h2>
+
+            <div class="space-y-3" id="recentActivity">
+                <!-- Activity items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Create Assignment Modal -->
+    <div class="modal" id="assignmentModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold light-text">Create New Assignment</h3>
+                <button onclick="closeModal('assignmentModal')" class="text-accent hover:text-white">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-accent mb-2">Assignment Title</label>
+                    <input type="text" id="assignmentTitle"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="Enter assignment title">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Description</label>
+                    <textarea id="assignmentDescription" rows="3"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="Describe the assignment..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-accent mb-2">Class</label>
+                        <select id="assignmentClass"
+                            class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                            <option value="all">All Classes</option>
+                            <option value="math8a">Math 8A</option>
+                            <option value="math8b">Math 8B</option>
+                            <option value="math9">Math 9</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-accent mb-2">Due Date</label>
+                        <input type="date" id="assignmentDueDate"
+                            class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Points</label>
+                    <input type="number" id="assignmentPoints" value="100"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button onclick="saveAssignment()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Create Assignment
+                    </button>
+                    <button onclick="closeModal('assignmentModal')"
+                        class="flex-1 py-3 glass-card border border-secondary/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leveled Assignment Modal -->
+    <div class="modal" id="leveledAssignmentModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold light-text">Create Leveled Assignment</h3>
+                <button onclick="closeModal('leveledAssignmentModal')" class="text-accent hover:text-white">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm text-accent mb-2">Base Assignment</label>
+                    <textarea rows="3"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="Describe the base assignment..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="p-4 glass-card rounded-lg">
+                        <div class="font-semibold light-text mb-2">Basic Level</div>
+                        <textarea rows="2"
+                            class="w-full px-2 py-1 glass-card border border-secondary/30 rounded text-sm text-white"
+                            placeholder="Simplified version..."></textarea>
+                        <div class="text-xs text-accent mt-2">For students needing support</div>
+                    </div>
+
+                    <div class="p-4 glass-card rounded-lg">
+                        <div class="font-semibold light-text mb-2">Intermediate</div>
+                        <textarea rows="2"
+                            class="w-full px-2 py-1 glass-card border border-secondary/30 rounded text-sm text-white"
+                            placeholder="Standard version..."></textarea>
+                        <div class="text-xs text-accent mt-2">For most students</div>
+                    </div>
+
+                    <div class="p-4 glass-card rounded-lg">
+                        <div class="font-semibold light-text mb-2">Advanced</div>
+                        <textarea rows="2"
+                            class="w-full px-2 py-1 glass-card border border-secondary/30 rounded text-sm text-white"
+                            placeholder="Extended version..."></textarea>
+                        <div class="text-xs text-accent mt-2">For enrichment</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="saveLeveledAssignment()" class="flex-1 py-3 btn-accent rounded-lg font-medium">
+                        Create Levels
+                    </button>
+                    <button onclick="closeModal('leveledAssignmentModal')"
+                        class="flex-1 py-3 glass-card border border-secondary/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Quiz Modal -->
+    <div class="modal" id="quickQuizModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold light-text">Create Quick Quiz</h3>
+                <button onclick="closeModal('quickQuizModal')" class="text-accent hover:text-white">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-accent mb-2">Quiz Topic</label>
+                    <input type="text"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="e.g., Fractions, Photosynthesis">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Number of Questions</label>
+                    <input type="number" value="5" min="1" max="10"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Question Type</label>
+                    <select class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                        <option value="multiple">Multiple Choice</option>
+                        <option value="truefalse">True/False</option>
+                        <option value="short">Short Answer</option>
+                        <option value="mix">Mixed</option>
+                    </select>
+                </div>
+
+                <div class="p-4 glass-card rounded-lg">
+                    <div class="font-semibold light-text mb-2">AI-Generated Questions Preview</div>
+                    <div class="text-sm text-accent space-y-2">
+                        <div class="p-2 glass-card rounded">1. What is 3/4 of 24?</div>
+                        <div class="p-2 glass-card rounded">2. Simplify 12/16 to lowest terms</div>
+                        <div class="p-2 glass-card rounded">3. Convert 0.75 to a fraction</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="createQuiz()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Generate Quiz
+                    </button>
+                    <button onclick="closeModal('quickQuizModal')"
+                        class="flex-1 py-3 glass-card border border-secondary/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div class="modal" id="attendanceModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold light-text">Take Attendance</h3>
+                <button onclick="closeModal('attendanceModal')" class="text-accent hover:text-white">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <label class="block text-sm text-accent mb-2">Class</label>
+                        <select id="attendanceClass"
+                            class="px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                            <option value="math8a">Math 8A (25 students)</option>
+                            <option value="math8b">Math 8B (24 students)</option>
+                            <option value="math9">Math 9 (26 students)</option>
+                        </select>
+                    </div>
+                    <div class="text-sm text-accent">
+                        <span id="attendanceDate">Today</span>
+                    </div>
+                </div>
+
+                <div class="max-h-96 overflow-y-auto" id="attendanceList">
+                    <!-- Students will be loaded here -->
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="saveAttendance()" class="flex-1 py-3 btn-accent rounded-lg font-medium">
+                        Save Attendance
+                    </button>
+                    <button onclick="closeModal('attendanceModal')"
+                        class="flex-1 py-3 glass-card border border-secondary/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Resource Modal -->
+    <div class="modal" id="shareResourceModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold light-text">Share Resource</h3>
+                <button onclick="closeModal('shareResourceModal')" class="text-accent hover:text-white">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-accent mb-2">Resource Title</label>
+                    <input type="text" id="resourceTitle"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="e.g., Fractions Worksheet">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Description</label>
+                    <textarea id="resourceDescription" rows="3"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white"
+                        placeholder="Describe the resource..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Resource Type</label>
+                    <select id="resourceType"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                        <option value="worksheet">Worksheet</option>
+                        <option value="lesson">Lesson Plan</option>
+                        <option value="activity">Activity</option>
+                        <option value="assessment">Assessment</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-accent mb-2">Subject</label>
+                    <select id="resourceSubject"
+                        class="w-full px-4 py-2 glass-card border border-secondary/30 rounded-lg text-white">
+                        <option value="math">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="social">Social Studies</option>
+                        <option value="all">All Subjects</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="uploadResource()" class="flex-1 py-3 btn-primary rounded-lg font-medium">
+                        Share Resource
+                    </button>
+                    <button onclick="closeModal('shareResourceModal')"
+                        class="flex-1 py-3 glass-card border border-secondary/30 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="components/header.js"></script>
+    <script>
+        // ===== GLOBAL VARIABLES =====
+        let teacherData = {
+            classes: [],
+            students: [],
+            assignments: [],
+            resources: []
+        };
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function () {
+            feather.replace();
+            loadTeacherData();
+            setupCharts();
+            updateCurrentDate();
+            loadMockData();
+        });
+
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function loadTeacherData() {
+            // Load teacher-specific data from localStorage
+            const savedData = localStorage.getItem('teacherData');
+            if (savedData) {
+                teacherData = JSON.parse(savedData);
+            } else {
+                loadMockData();
+            }
+
+            updateDashboard();
+        }
+
+        function loadMockData() {
+            // Mock classes
+            teacherData.classes = [
+                {
+                    id: 1,
+                    name: 'Math 8A',
+                    subject: 'Mathematics',
+                    students: 25,
+                    time: '9:00 AM',
+                    avgScore: 82,
+                    color: 'purple'
+                },
+                {
+                    id: 2,
+                    name: 'Math 8B',
+                    subject: 'Mathematics',
+                    students: 24,
+                    time: '10:30 AM',
+                    avgScore: 78,
+                    color: 'pink'
+                },
+                {
+                    id: 3,
+                    name: 'Math 9',
+                    subject: 'Mathematics',
+                    students: 26,
+                    time: '1:00 PM',
+                    avgScore: 85,
+                    color: 'accent'
+                }
+            ];
+
+            // Mock students for attendance
+            teacherData.students = [
+                { id: 1, name: 'Aarav Sharma', class: 'Math 8A', status: 'present' },
+                { id: 2, name: 'Priya Patel', class: 'Math 8A', status: 'present' },
+                { id: 3, name: 'Rohan Singh', class: 'Math 8A', status: 'absent' },
+                { id: 4, name: 'Ananya Kumar', class: 'Math 8B', status: 'present' },
+                { id: 5, name: 'Vikram Joshi', class: 'Math 8B', status: 'late' },
+                { id: 6, name: 'Sneha Reddy', class: 'Math 9', status: 'present' }
+            ];
+
+            // Mock assignments
+            teacherData.assignments = [
+                {
+                    id: 1,
+                    title: 'Fractions Quiz',
+                    class: 'Math 8A',
+                    due: 'Tomorrow',
+                    submitted: 18,
+                    total: 25,
+                    type: 'quiz'
+                },
+                {
+                    id: 2,
+                    title: 'Algebra Worksheet',
+                    class: 'Math 9',
+                    due: 'In 2 days',
+                    submitted: 15,
+                    total: 26,
+                    type: 'worksheet'
+                }
+            ];
+
+            // Mock shared resources
+            teacherData.resources = [
+                {
+                    id: 1,
+                    title: 'Fractions Mastery Pack',
+                    author: 'Mr. Singh',
+                    type: 'worksheet',
+                    downloads: 24
+                },
+                {
+                    id: 2,
+                    title: 'Algebra Games',
+                    author: 'Ms. Gupta',
+                    type: 'activity',
+                    downloads: 18
+                }
+            ];
+
+            // Save mock data
+            localStorage.setItem('teacherData', JSON.stringify(teacherData));
+        }
+
+        function updateDashboard() {
+            updateClassesList();
+            updateAttendanceStats();
+            updateRecentAssessments();
+            updateSharedResources();
+            updateDifferentiationSuggestions();
+            updateRecentActivity();
+            updateStudentSelect();
+        }
+
+        // ===== PHASE 2.1: VIRTUAL CLASSROOMS =====
+        function updateClassesList() {
+            const classesList = document.getElementById('classesList');
+            classesList.innerHTML = teacherData.classes.map(cls => `
+                <div class="glass-card p-4 rounded-lg hover-glow transition-all cursor-pointer" onclick="viewClassDetails(${cls.id})">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-bold light-text text-lg">${cls.name}</h4>
+                            <p class="text-sm text-accent">${cls.subject} • ${cls.students} students</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full ${cls.color === 'purple' ? 'avatar-purple' : cls.color === 'pink' ? 'avatar-pink' : 'accent-bg'} flex items-center justify-center">
+                            <i data-feather="book" class="w-4 h-4 text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-xs text-accent">Class Time</div>
+                            <div class="font-semibold light-text">${cls.time}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-accent">Avg. Score</div>
+                            <div class="font-bold secondary-text">${cls.avgScore}%</div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-accent mb-1">
+                            <span>Progress</span>
+                            <span>${cls.avgScore}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill secondary-progress" style="width: ${cls.avgScore}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            feather.replace();
+        }
+
+        function createNewClass() {
+            alert('Create new class functionality would open a form.\n\nIn a full implementation, teachers could:\n• Name the class\n• Select subject/grade\n• Set meeting times\n• Import students from roster');
+        }
+
+        function viewClassDetails(classId) {
+            const cls = teacherData.classes.find(c => c.id === classId);
+            if (cls) {
+                alert(`Viewing details for ${cls.name}\n\nStudents: ${cls.students}\nAverage Score: ${cls.avgScore}%\nClass Time: ${cls.time}\n\nFeatures would include:\n• Student list with individual progress\n• Assignment history\n• Class announcements\n• Parent contacts\n• Performance analytics`);
+            }
+        }
+
+        // ===== PHASE 2.2: DIFFERENTIATION TOOLS =====
+        function createLeveledAssignment() {
+            document.getElementById('leveledAssignmentModal').style.display = 'flex';
+        }
+
+        function saveLeveledAssignment() {
+            alert('Leveled assignment created!\n\nThis assignment would have three versions:\n• Basic: Simplified for struggling students\n• Intermediate: Standard for most students\n• Advanced: Extended for enrichment\n\nStudents would be auto-assigned based on their performance.');
+            closeModal('leveledAssignmentModal');
+        }
+
+        function showGroupingTool() {
+            alert('Smart Grouping Tool\n\nAutomatically groups students by:\n• Skill level\n• Learning style\n• Social dynamics\n• Performance patterns\n\nGroups can be used for:\n• Collaborative projects\n• Peer tutoring\n• Small group instruction');
+        }
+
+        function showScaffoldingTool() {
+            alert('Scaffolding Tools\n\nGenerate support materials for struggling students:\n• Step-by-step guides\n• Vocabulary supports\n• Visual aids\n• Worked examples\n• Sentence starters\n• Modified texts');
+        }
+
+        function updateDifferentiationSuggestions() {
+            const suggestionsDiv = document.getElementById('differentiationSuggestions');
+            suggestionsDiv.innerHTML = `
+                <div class="text-sm space-y-2">
+                    <div class="flex items-start gap-2">
+                        <i data-feather="alert-circle" class="w-4 h-4 accent-text mt-0.5"></i>
+                        <span>3 students in Math 8A are struggling with fractions. Consider using visual aids.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-feather="zap" class="w-4 h-4 secondary-text mt-0.5"></i>
+                        <span>5 advanced students ready for algebra enrichment activities.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-feather="users" class="w-4 h-4 accent-text mt-0.5"></i>
+                        <span>Group project suggestion: Fractions in real-world applications.</span>
+                    </div>
+                </div>
+            `;
+            feather.replace();
+        }
+
+        // ===== PHASE 2.3: FORMATIVE ASSESSMENT CREATOR =====
+        function createQuickQuiz() {
+            document.getElementById('quickQuizModal').style.display = 'flex';
+        }
+
+        function createQuiz() {
+            alert('Quick quiz generated!\n\n5 multiple-choice questions on Fractions\n\nFeatures:\n• Auto-grading\n• Instant results\n• Common misconception analysis\n• Student response visualization');
+            closeModal('quickQuizModal');
+        }
+
+        function createExitTicket() {
+            alert('Exit Ticket Creator\n\nGenerate end-of-lesson questions:\n• What did you learn today?\n• What questions do you still have?\n• Rate your understanding (1-5)\n• One thing you found challenging');
+        }
+
+        function createPoll() {
+            alert('Class Poll Creator\n\nQuick polling questions:\n• Multiple choice\n• Rating scales\n• Word clouds\n• Open responses\n\nReal-time results displayed to class');
+        }
+
+        function createSelfAssessment() {
+            alert('Self-Assessment Tool\n\nStudents assess their own:\n• Understanding of concepts\n• Effort level\n• Areas needing help\n• Learning goals\n\nResults help guide instruction');
+        }
+
+        function updateRecentAssessments() {
+            const assessmentsDiv = document.getElementById('recentAssessments');
+            assessmentsDiv.innerHTML = teacherData.assignments.map(ass => `
+                <div class="flex justify-between items-center p-2 glass-card rounded mb-2">
+                    <div>
+                        <div class="font-medium light-text text-sm">${ass.title}</div>
+                        <div class="text-xs text-accent">${ass.class} • Due ${ass.due}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold ${ass.submitted === ass.total ? 'secondary-text' : 'accent-text'}">
+                            ${ass.submitted}/${ass.total}
+                        </div>
+                        <div class="text-xs text-accent">submitted</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== PHASE 2.4: ATTENDANCE & BEHAVIOR TRACKER =====
+        function updateAttendanceStats() {
+            const present = teacherData.students.filter(s => s.status === 'present').length;
+            const absent = teacherData.students.filter(s => s.status === 'absent').length;
+            const late = teacherData.students.filter(s => s.status === 'late').length;
+
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('lateCount').textContent = late;
+        }
+
+        function takeAttendance() {
+            document.getElementById('attendanceModal').style.display = 'flex';
+            loadAttendanceList();
+        }
+
+        function loadAttendanceList() {
+            const attendanceList = document.getElementById('attendanceList');
+            const selectedClass = document.getElementById('attendanceClass').value;
+
+            // Filter students by class
+            const classStudents = teacherData.students.filter(s =>
+                selectedClass === 'all' || s.class.toLowerCase().includes(selectedClass.replace('math ', ''))
+            );
+
+            attendanceList.innerHTML = classStudents.map(student => `
+                <div class="flex items-center justify-between p-3 glass-card rounded-lg mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full ${getStatusColor(student.status)} flex items-center justify-center">
+                            <i data-feather="${getStatusIcon(student.status)}" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium light-text">${student.name}</div>
+                            <div class="text-xs text-accent">${student.class}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="setAttendance(${student.id}, 'present')" 
+                                class="px-3 py-1 ${student.status === 'present' ? 'bg-green-500/30 text-green-300' : 'glass-card'} rounded text-sm">
+                            Present
+                        </button>
+                        <button onclick="setAttendance(${student.id}, 'absent')" 
+                                class="px-3 py-1 ${student.status === 'absent' ? 'bg-red-500/30 text-red-300' : 'glass-card'} rounded text-sm">
+                            Absent
+                        </button>
+                        <button onclick="setAttendance(${student.id}, 'late')" 
+                                class="px-3 py-1 ${student.status === 'late' ? 'bg-yellow-500/30 text-yellow-300' : 'glass-card'} rounded text-sm">
+                            Late
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            feather.replace();
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'present': return 'bg-green-500/20';
+                case 'absent': return 'bg-red-500/20';
+                case 'late': return 'bg-yellow-500/20';
+                default: return 'glass-card';
+            }
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'present': return 'check';
+                case 'absent': return 'x';
+                case 'late': return 'clock';
+                default: return 'user';
+            }
+        }
+
+        function setAttendance(studentId, status) {
+            const student = teacherData.students.find(s => s.id === studentId);
+            if (student) {
+                student.status = status;
+                localStorage.setItem('teacherData', JSON.stringify(teacherData));
+                loadAttendanceList();
+                updateAttendanceStats();
+            }
+        }
+
+        function saveAttendance() {
+            alert('Attendance saved successfully!\n\n• Emailed to school office\n• Parent notifications sent for absences\n• Added to student records\n• Available for reports');
+            closeModal('attendanceModal');
+        }
+
+        // ===== PHASE 2.5: REPORT CARD/COMMENT GENERATOR =====
+        function updateStudentSelect() {
+            const studentSelect = document.getElementById('studentSelect');
+            const uniqueStudents = [...new Set(teacherData.students.map(s => s.name))];
+
+            studentSelect.innerHTML = '<option value="">Select a student</option>' +
+                uniqueStudents.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
+
+        function generateComment() {
+            const student = document.getElementById('studentSelect').value;
+            const type = document.getElementById('commentType').value;
+            const tone = document.getElementById('commentTone').value;
+
+            if (!student) {
+                alert('Please select a student first.');
+                return;
+            }
+
+            const comments = {
+                strength: {
+                    formal: `${student} demonstrates strong analytical skills and consistently applies mathematical concepts accurately. Their problem-solving approach shows excellent logical reasoning.`,
+                    encouraging: `${student} has a wonderful grasp of mathematical concepts! Their problem-solving skills are impressive and they approach challenges with great determination.`,
+                    detailed: `${student} shows exceptional strength in algebraic reasoning and geometric visualization. They consistently score in the top 10% of the class on assessments requiring critical thinking.`,
+                    brief: `${student} excels in mathematical reasoning and problem-solving.`
+                },
+                growth: {
+                    formal: `${student} has shown significant improvement in applying mathematical procedures this term. Their accuracy rate has increased by 15% since the last assessment period.`,
+                    encouraging: `I'm so proud of ${student}'s growth this term! Their confidence in tackling complex problems has really blossomed, and their accuracy continues to improve.`,
+                    detailed: `${student} has made notable progress in algebraic problem-solving, moving from 65% to 82% accuracy. Their conceptual understanding has deepened significantly.`,
+                    brief: `${student} has shown excellent growth in mathematical understanding this term.`
+                }
+            };
+
+            const commentDiv = document.getElementById('generatedComment');
+            const commentText = document.getElementById('commentText');
+
+            commentText.textContent = comments[type]?.[tone] ||
+                `${student} is making good progress in mathematics. Continue to encourage practice with challenging problems.`;
+
+            commentDiv.classList.remove('hidden');
+            commentDiv.classList.add('slide-in');
+        }
+
+        function copyComment() {
+            const commentText = document.getElementById('commentText').textContent;
+            navigator.clipboard.writeText(commentText)
+                .then(() => alert('Comment copied to clipboard!'))
+                .catch(err => console.error('Failed to copy:', err));
+        }
+
+        // ===== PHASE 2.6: RESOURCE SHARING =====
+        function updateSharedResources() {
+            const resourcesDiv = document.getElementById('sharedResources');
+            resourcesDiv.innerHTML = teacherData.resources.map(res => `
+                <div class="p-3 glass-card rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-semibold light-text">${res.title}</div>
+                            <div class="text-xs text-accent">By ${res.author}</div>
+                        </div>
+                        <span class="text-xs px-2 py-1 ${res.type === 'worksheet' ? 'bg-secondary/20 text-accent' : 'bg-accent/20 text-accent'} rounded">
+                            ${res.type}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-accent">
+                        <span>${res.downloads} downloads</span>
+                        <button onclick="downloadResource(${res.id})" class="px-2 py-1 btn-light rounded text-xs">
+                            Download
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function shareResource() {
+            document.getElementById('shareResourceModal').style.display = 'flex';
+        }
+
+        function uploadResource() {
+            const title = document.getElementById('resourceTitle').value;
+            const description = document.getElementById('resourceDescription').value;
+            const type = document.getElementById('resourceType').value;
+            const subject = document.getElementById('resourceSubject').value;
+
+            if (!title) {
+                alert('Please enter a resource title.');
+                return;
+            }
+
+            const newResource = {
+                id: teacherData.resources.length + 1,
+                title,
+                description,
+                type,
+                subject,
+                author: 'Mrs. Sharma',
+                downloads: 0
+            };
+
+            teacherData.resources.push(newResource);
+            localStorage.setItem('teacherData', JSON.stringify(teacherData));
+
+            alert('Resource shared successfully!\n\nAvailable to all teachers in the school.\nOther teachers can rate and review your resource.');
+
+            closeModal('shareResourceModal');
+            updateSharedResources();
+
+            // Clear form
+            document.getElementById('resourceTitle').value = '';
+            document.getElementById('resourceDescription').value = '';
+        }
+
+        function downloadResource(resourceId) {
+            const resource = teacherData.resources.find(r => r.id === resourceId);
+            if (resource) {
+                resource.downloads++;
+                localStorage.setItem('teacherData', JSON.stringify(teacherData));
+                updateSharedResources();
+                alert(`Downloading "${resource.title}"\n\nFile would download to your device.`);
+            }
+        }
+
+        // ===== ASSIGNMENT MANAGEMENT =====
+        function createNewAssignment() {
+            document.getElementById('assignmentModal').style.display = 'flex';
+        }
+
+        function saveAssignment() {
+            const title = document.getElementById('assignmentTitle').value;
+            const description = document.getElementById('assignmentDescription').value;
+            const classSelected = document.getElementById('assignmentClass').value;
+            const dueDate = document.getElementById('assignmentDueDate').value;
+            const points = document.getElementById('assignmentPoints').value;
+
+            if (!title) {
+                alert('Please enter an assignment title.');
+                return;
+            }
+
+            const newAssignment = {
+                id: teacherData.assignments.length + 1,
+                title,
+                description,
+                class: classSelected,
+                due: dueDate ? new Date(dueDate).toLocaleDateString() : 'No due date',
+                points: parseInt(points) || 100,
+                submitted: 0,
+                total: classSelected === 'all' ? 75 : teacherData.classes.find(c =>
+                    c.name.toLowerCase().includes(classSelected.replace('math ', ''))
+                )?.students || 25,
+                type: 'assignment'
+            };
+
+            teacherData.assignments.push(newAssignment);
+            localStorage.setItem('teacherData', JSON.stringify(teacherData));
+
+            alert(`Assignment "${title}" created successfully!\n\nAssigned to: ${classSelected === 'all' ? 'All classes' : classSelected}\nPoints: ${points}\nDue: ${newAssignment.due}`);
+
+            closeModal('assignmentModal');
+            updateRecentAssessments();
+
+            // Clear form
+            document.getElementById('assignmentTitle').value = '';
+            document.getElementById('assignmentDescription').value = '';
+            document.getElementById('assignmentPoints').value = '100';
+        }
+
+        // ===== RECENT ACTIVITY =====
+        function updateRecentActivity() {
+            const activityDiv = document.getElementById('recentActivity');
+
+            const activities = [
+                { time: '10 min ago', action: 'Graded Fractions Quiz for Math 8A', icon: 'clipboard' },
+                { time: '1 hour ago', action: 'Shared Algebra Games resource', icon: 'share-2' },
+                { time: '2 hours ago', action: 'Updated attendance for Math 9', icon: 'users' },
+                { time: 'Yesterday', action: 'Created leveled assignment on Geometry', icon: 'layers' },
+                { time: '2 days ago', action: 'Sent progress reports to parents', icon: 'mail' }
+            ];
+
+            activityDiv.innerHTML = activities.map(act => `
+                <div class="flex items-start gap-3 p-3 glass-card rounded-lg">
+                    <div class="w-8 h-8 rounded-full ${act.icon === 'clipboard' ? 'secondary-bg' : act.icon === 'share-2' ? 'accent-bg' : 'avatar-purple'} flex items-center justify-center flex-shrink-0">
+                        <i data-feather="${act.icon}" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="light-text">${act.action}</div>
+                        <div class="text-xs text-accent">${act.time}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            feather.replace();
+        }
+
+        // ===== CHARTS =====
+        function setupCharts() {
+            const ctx = document.getElementById('performanceChart')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                        datasets: [
+                            {
+                                label: 'Math 8A',
+                                data: [65, 70, 75, 78, 80, 82],
+                                borderColor: '#982598',
+                                backgroundColor: 'rgba(152, 37, 152, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Math 8B',
+                                data: [60, 68, 72, 75, 76, 78],
+                                borderColor: '#E491C9',
+                                backgroundColor: 'rgba(228, 145, 201, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Math 9',
+                                data: [70, 75, 78, 80, 82, 85],
+                                borderColor: '#F1E9E9',
+                                backgroundColor: 'rgba(241, 233, 233, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#F1E9E9'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: '#E491C9'
+                                },
+                                grid: {
+                                    color: 'rgba(241, 233, 233, 0.1)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#E491C9'
+                                },
+                                grid: {
+                                    color: 'rgba(241, 233, 233, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
